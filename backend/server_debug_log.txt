@@ -1,0 +1,8 @@
+
+[2025-12-26T08:12:29.323Z] UpdateProduct ID 1 - Media Payload: undefined
+
+[2025-12-26T08:15:22.418Z] UpdateProduct ID 1 FULL DATA KEYS: title,description,slug,categoryId,status,variants
+Media Present: false
+
+[2025-12-26T08:20:40.903Z] UpdateProduct ID 1 FULL DATA KEYS: title,description,slug,categoryId,status,variants
+Media Count: N/A

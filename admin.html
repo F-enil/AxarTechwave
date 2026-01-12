@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axar TechWave - Admin Panel</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#003040',
+                        secondary: '#004040',
+                        accent: '#60B000',
+                        blue: '#0060A0',
+                        lightbg: '#F0F0F0'
+                    },
+                    fontFamily: {
+                        'heading': ['Playfair Display', 'serif'],
+                        'body': ['Poppins', 'sans-serif'],
+                        'alt-heading': ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-body text-gray-800 bg-gray-50 h-screen overflow-hidden">
+    <!-- Admin SPA Container -->
+    <div id="admin-app" class="h-full">
+        <div class="flex items-center justify-center h-full">
+            <div class="loading"></div>
+        </div>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="js/config.js?v=portChange1"></script>
+    <script src="js/api.js?v=invoice1"></script>
+    <script src="js/auth.js?v=invoice1"></script>
+    <script src="js/ui.js?v=invoice1"></script>
+    <script src="js/admin.js?v=exportFixV3"></script>
+</body>
+
+</html>
