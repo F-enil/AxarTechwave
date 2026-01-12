@@ -27,3 +27,4 @@ export class MediaController {
             s3Key: result.public_id
         };
     }
+}
