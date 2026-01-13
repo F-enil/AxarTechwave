@@ -52,10 +52,17 @@ export class CatalogService {
         });
 
         // Generate URLs
-        const mediaWithUrls = await Promise.all(mediaItems.map(async (m) => ({
-            ...m,
-            url: await this.mediaService.getPresignedUrl(m.s3Key)
-        })));
+        const mediaWithUrls = await Promise.all(mediaItems.map(async (m) => {
+            try {
+                return {
+                    ...m,
+                    url: await this.mediaService.getPresignedUrl(m.s3Key)
+                };
+            } catch (e) {
+                console.warn(`Failed to sign URL for media ${m.id}`, e);
+                return { ...m, url: '' };
+            }
+        }));
 
         return products.map(p => ({
             ...p,

@@ -8,26 +8,44 @@ export class CatalogController {
     constructor(private readonly catalogService: CatalogService) { }
 
     @Get('categories')
-    getCategories() {
-        return this.catalogService.getCategories();
+    async getCategories() {
+        try {
+            return await this.catalogService.getCategories();
+        } catch (error) {
+            console.error('Get categories failed', error);
+            return [];
+        }
     }
 
     @Get('products')
-    getProducts(@Query('category') categoryId?: string, @Query('search') search?: string) {
-        const where: any = {};
-        if (categoryId) where.categoryId = Number(categoryId);
-        if (search) {
-            where.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-            ];
+    async getProducts(@Query('category') categoryId?: string, @Query('search') search?: string) {
+        try {
+            const where: any = {};
+            if (categoryId) where.categoryId = Number(categoryId);
+            if (search) {
+                where.OR = [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                ];
+            }
+            return await this.catalogService.getProducts({ where });
+        } catch (error) {
+            console.error('Get products failed', error);
+            // Return empty array to prevent frontend crash
+            return [];
         }
-        return this.catalogService.getProducts({ where });
     }
 
     @Get('products/:slug')
-    getProduct(@Param('slug') slug: string) {
-        return this.catalogService.getProduct(slug);
+    async getProduct(@Param('slug') slug: string) {
+        try {
+            return await this.catalogService.getProduct(slug);
+        } catch (error) {
+            // Re-throw 404
+            if (error.status === 404) throw error;
+            console.error('Get product by slug failed', error);
+            throw new Error('Product not found or unavailable');
+        }
     }
 
     @UseGuards(JwtAuthGuard, AdminGuard)
