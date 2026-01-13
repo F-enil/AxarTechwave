@@ -11,7 +11,12 @@ async function bootstrap() {
 
     // Security: Strict CORS
     app.enableCors({
-        origin: ['http://localhost:5500', 'http://127.0.0.1:5500'], // Allow only local dev for now OR specific domain
+        origin: [
+            'http://localhost:5500', 
+            'http://127.0.0.1:5500',
+            'https://www.axartechwave.com',
+            'https://axartechwave.com'
+        ], // Allow local dev AND production
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     });
