@@ -4,3 +4,4 @@ const CONFIG = {
     // Cloudinary returns full URLs, so this is likely unused now, but keeping for safety
     MEDIA_URL: 'http://localhost:9000/ecommerce-media',
 };
+// force update 
