@@ -1,6 +1,5 @@
 const Admin = {
-    // DEBUG: PROVE FILE LOAD
-    init: () => { console.log("Admin Panel Loaded V3"); },
+    // Admin Panel Logic
     updateOrderStatus: async (orderId, status) => {
         try {
             await API.put(`/orders/${orderId}`, { status });
@@ -2158,7 +2157,7 @@ const Admin = {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    },
     async uploadSingleFile(file) {
         const formData = new FormData();
         formData.append('file', file);
