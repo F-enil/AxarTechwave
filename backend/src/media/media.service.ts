@@ -28,9 +28,11 @@ export class MediaService {
 
     // Deprecated but kept for compatibility logic (if any)
     async getPresignedUrl(key: string) {
-        // Cloudinary URLs are public unless strict. Assuming public for now.
-        // If 'key' is full URL, return it.
-        return key;
+        if (!key) return '';
+        if (key.startsWith('http')) return key;
+
+        // Generate secure Cloudinary URL from public ID
+        return cloudinary.url(key, { secure: true });
     }
 
     async uploadUrl(key: string) {
