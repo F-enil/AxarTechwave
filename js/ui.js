@@ -380,23 +380,37 @@ const UI = {
         const price = variant.prices[0]?.basePrice || 'N/A';
         const image = product.media && product.media.length > 0 ? (product.media[0].url || product.media[0].s3Key) : 'https://via.placeholder.com/150';
 
+        const stock = variant.stock !== undefined ? Number(variant.stock) : undefined;
+        const isOutOfStock = product.status !== 'active' || variant.status !== 'active' || (stock !== undefined && stock <= 0);
+
         return `
-            <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex gap-6 items-center">
-                <div class="w-32 h-32 flex-shrink-0">
+            <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center relative ${isOutOfStock ? 'opacity-75' : ''}">
+                ${isOutOfStock ? `
+                <div class="absolute top-2 left-2 z-10">
+                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold transform -rotate-12 shadow-sm">OUT OF STOCK</span>
+                </div>
+                ` : ''}
+                
+                <div class="w-full sm:w-32 h-48 sm:h-32 flex-shrink-0">
                     <img src="${image}" alt="${product.title}" class="w-full h-full object-contain bg-white rounded-md">
                 </div>
-                <div class="flex-grow">
-                    <h3 class="font-heading font-bold text-xl mb-2 text-primary">${product.title}</h3>
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">${product.description || 'No description'}</p>
-                    <div class="flex items-center gap-2 mb-4">
+                <div class="flex-grow w-full">
+                    <h3 class="font-heading font-bold text-lg sm:text-xl mb-1 sm:mb-2 text-primary">${product.title}</h3>
+                    <p class="text-gray-600 text-sm mb-2 sm:mb-4 line-clamp-2">${product.description || 'No description'}</p>
+                    <div class="flex items-center gap-2 mb-2 sm:mb-4">
                         <span class="text-yellow-400">★★★★☆</span>
                         <span class="text-xs text-gray-400">(24 reviews)</span>
                     </div>
                 </div>
-                <div class="flex flex-col items-end gap-3 min-w-[120px]">
+                <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto gap-3 min-w-[120px]">
                      <span class="font-bold text-xl text-primary">₹${price.toLocaleString()}</span>
-                     <button onclick="UI.showProductDetail(${product.id})" class="text-sm text-primary hover:underline">View Details</button>
-                     <button onclick="window.addToCart(${variant.id})" class="w-full btn-primary px-4 py-2 rounded text-sm">Add to Cart</button>
+                     <div class="flex gap-2 sm:block w-full sm:w-auto">
+                        <button onclick="UI.showProductDetail(${product.id})" class="text-sm text-primary hover:underline hidden sm:block mb-2 text-right w-full">View Details</button>
+                        ${isOutOfStock ?
+                `<button disabled class="w-full btn-primary px-4 py-2 rounded text-sm opacity-50 cursor-not-allowed bg-gray-400 border-none">Out of Stock</button>` :
+                `<button onclick="window.addToCart(${variant.id})" class="w-full btn-primary px-4 py-2 rounded text-sm whitespace-nowrap">Add to Cart</button>`
+            }
+                     </div>
                 </div>
             </div>
         `;
