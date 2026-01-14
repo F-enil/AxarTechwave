@@ -349,7 +349,7 @@
                 left: 0;
                 top: 0;
                 height: 100vh;
-                z-index: 200;
+                z-index: 9999;
                 background: white;
                 transform: translateX(-100%);
             }
@@ -676,12 +676,8 @@
             <div class="container mx-auto px-4 py-8">
                 <div class="flex flex-col lg:flex-row gap-8">
                     <!-- Mobile Filter Toggle -->
-                    <div class="lg:hidden w-full">
-                        <button onclick="toggleFilters()"
-                            class="w-full py-3 px-4 bg-white border border-gray-200 rounded-lg font-medium text-primary flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors">
-                            <span class="mr-2">⚡</span> Filter Products
-                        </button>
-                    </div>
+                    <!-- Mobile Filter Toggle (Removed redundancy) -->
+                    <!-- Filter button is now in the toolbar -->
 
                     <!-- Filters Sidebar -->
                     <aside
@@ -1871,12 +1867,17 @@
         // Inline overrides removed. Using main UI.js logic.
 
         // Add toggleFilters function for mobile sidebar
-        function toggleFilters() {
+        // Add toggleFilters function for mobile sidebar - Explicitly attached to window
+        window.toggleFilters = function () {
+            console.log('toggleFilters called');
             const sidebar = document.querySelector('.filter-sidebar');
             if (sidebar) {
+                console.log('Sidebar found, toggling open class');
                 sidebar.classList.toggle('open');
+            } else {
+                console.error('Sidebar element .filter-sidebar not found!');
             }
-        }
+        };
 
 
 
