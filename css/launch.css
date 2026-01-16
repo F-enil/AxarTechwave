@@ -1,0 +1,242 @@
+/* Launch Page Styles */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #fdf5e6;
+    /* Soft cream background behind curtains */
+    font-family: 'Rasa', serif;
+}
+
+.launch-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+.reveal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1s ease 1s;
+}
+
+.reveal-content.show {
+    opacity: 1;
+}
+
+/* Curtain Wrapper */
+.curtain-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+}
+
+/* Individual Curtains */
+.curtain {
+    width: 50%;
+    height: 100%;
+    background-image: url('../images/launch_poster.jpg');
+    background-size: cover;
+    /* Or 200% 100% to split the image? see below */
+    background-repeat: no-repeat;
+    position: relative;
+    transition: transform 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 
+   Splitting the background image:
+   Left curtain shows the left half.
+   Right curtain shows the right half.
+*/
+.curtain.left {
+    background-position: left center;
+    background-size: 200% 100%;
+    /* Stretch width double so half fits here */
+    transform-origin: left center;
+    border-right: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.curtain.right {
+    background-position: right center;
+    background-size: 200% 100%;
+    transform-origin: right center;
+    border-left: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Open States */
+.curtain.left.open {
+    transform: translateX(-100%);
+}
+
+.curtain.right.open {
+    transform: translateX(100%);
+}
+
+/* Overlay Information (Text on top of curtains) */
+.overlay-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 0;
+    box-sizing: border-box;
+    /* We need this to split/fade when curtains open */
+    transition: opacity 0.5s ease;
+}
+
+.overlay-info.fade-out {
+    opacity: 0;
+}
+
+.god-header {
+    width: 100%;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #5a3e1b;
+    /* Dark gold/brown */
+    font-weight: 600;
+    margin-top: 20px;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: space-around;
+    padding: 0 50px;
+}
+
+.logo-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.launch-logo {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 50%;
+    /* Make it circular if it's icon-like, or remove if text-heavy */
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    box-shadow: 0 0 25px rgba(218, 165, 32, 0.6);
+    /* Gold glow */
+    border: 3px solid #daa520;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.launch-details {
+    margin-bottom: 25vh;
+    /* Push up from bottom */
+    text-align: center;
+    background: rgba(255, 255, 255, 0.85);
+    /* Semi-transparent box to read text over poster */
+    padding: 20px 40px;
+    border-radius: 15px;
+    border: 2px solid #daa520;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.launch-details p {
+    margin: 8px 0;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.launch-details .date {
+    font-size: 1.8rem;
+    color: #e74c3c;
+}
+
+/* Ribbon */
+.ribbon-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    width: 80%;
+    /* Adjust based on image */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+#ribbonImage {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    /* If the ribbon creates a white box, try to blend it */
+    /* mix-blend-mode: multiply; */
+    filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+}
+
+.instruction {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 30px;
+    animation: pulse 2s infinite;
+}
+
+.instruction .key {
+    border: 1px solid #fff;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Ribbon Cut Animation */
+.ribbon-container.cut {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+}

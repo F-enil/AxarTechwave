@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axar Techwave - Grand Launch</title>
+    <link rel="stylesheet" href="css/launch.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+
+    <div class="launch-container">
+        <!-- Message Behind Curtains (The actual site/redirect message) -->
+        <div class="reveal-content">
+            <h1>Welcome to Axar Techwave</h1>
+            <p>Redirecting to Home...</p>
+        </div>
+
+        <!-- Curtains -->
+        <div class="curtain-wrapper" id="curtainWrapper">
+            <div class="curtain left" id="curtainLeft">
+                <div class="curtain-content">
+                    <!-- Overlay Text Left -->
+                </div>
+            </div>
+            <div class="curtain right" id="curtainRight">
+                <div class="curtain-content">
+                    <!-- Overlay Text Right -->
+                </div>
+            </div>
+
+            <!-- Content overlay that sits ON TOP of both curtains (centered) -->
+            <div class="overlay-info" id="overlayInfo">
+                <div class="god-header">
+                    <span>|| જય શ્રી સ્વામિનારાયણ ||</span>
+                    <span>|| શ્રી ગણેશાય નમ: ||</span>
+                    <span>|| જય શ્રી ઉમિયા માતાજી ||</span>
+                </div>
+
+                <div class="logo-container">
+                    <img src="images/logo.png" alt="Axar Techwave Logo" class="launch-logo">
+                </div>
+
+                <div class="launch-details">
+                    <p class="date">તારીખ :- 23-01-2026</p>
+                    <p class="festival">વસંત પંચમી</p>
+                    <p class="samvat">વિક્રમ સંવત: 2082</p>
+                    <p class="day">વાર :- શનિવાર</p>
+                </div>
+            </div>
+
+            <!-- Ribbon -->
+            <div class="ribbon-container" id="ribbonContainer">
+                <img src="images/launch_ribbon.jpg" alt="Ribbon" id="ribbonImage">
+                <p class="instruction">Press <span class="key">ENTER</span> to Launch</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/launch.js"></script>
+</body>
+
+</html>

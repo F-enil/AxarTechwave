@@ -241,8 +241,8 @@ const Admin = {
             if (success) {
                 const user = Auth.getUser();
                 if (user && (user.role === 'admin' || user.role === 'staff')) {
-                    this.renderLayout(user);
-                    this.loadDashboard();
+                    // Redirect to Launch Page for Grand Opening
+                    window.location.href = 'launch.html';
                 } else {
                     Admin.showToast('Access Denied: Not an admin account', 'error');
                     Auth.logout();

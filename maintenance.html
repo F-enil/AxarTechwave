@@ -52,8 +52,13 @@
         // Simple check to see if we can go back home
         async function checkStatus() {
             try {
-                // Add timestamp to prevent caching
-                const res = await fetch('http://localhost:3000/api/cms/settings?t=' + new Date().getTime(), {
+                // Use relative path for production compatibility, or hardcoded if necessary
+                // Assuming /api is proxied or absolute path is needed.
+                // Best to try relative first if hosted on same domain.
+                const apiUrl = '/api';
+                // Fallback for development if relative doesn't work (optional)
+
+                const res = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`, {
                     cache: "no-store",
                     headers: {
                         'Pragma': 'no-cache',
@@ -66,7 +71,7 @@
                     // Explicitly check for false (strict)
                     if (settings.maintenanceMode === false) {
                         console.log('Maintenance over, redirecting...');
-                        window.location.href = 'axartechwavedemo.html';
+                        window.location.href = '/'; // Go to root/index.html
                     }
                 }
             } catch (e) {

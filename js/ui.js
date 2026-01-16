@@ -118,10 +118,45 @@ const UI = {
         }
     },
 
+    // --- Maintenance Mode Auto-Redirect (Added) ---
+    setupMaintenanceCheck() {
+        const checkMaintenance = async () => {
+            try {
+                // Determine API URL safely (handle production relative path if needed, or use CONFIG)
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
+                    ? CONFIG.API_URL
+                    : '/api';
+
+                const res = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`);
+                if (res.ok) {
+                    const settings = await res.json();
+                    if (settings.maintenanceMode === true) {
+                        // If we are NOT already on maintenance page, redirect
+                        if (!window.location.pathname.includes('maintenance.html')) {
+                            console.log('Maintenance mode enabled. Redirecting...');
+                            window.location.href = 'maintenance.html';
+                        }
+                    }
+                }
+            } catch (e) {
+                // silent fail on network error, don't disrupt user
+            }
+        };
+
+        // Check every 10 seconds
+        setInterval(checkMaintenance, 10000);
+        // Also check once on load
+        checkMaintenance();
+    },
+
     init() {
-        this.checkAuth();
-        this.loadProducts();
+        this.setupAuthObserver();
+        this.loadCart();
         this.setupGlobalHandlers();
+        this.setupMaintenanceCheck(); // <--- Start polling
+
+        // ... existing init code ...
+
         this.updateCartCount();
         this.loadSiteSettings();
     },
