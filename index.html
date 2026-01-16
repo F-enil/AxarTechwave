@@ -30,59 +30,30 @@
             width: 100%;
             height: 100vh;
             z-index: 99999;
-            background: radial-gradient(circle at center, #2a0a0a, #000);
-            /* Dark backing */
+            /* Minimalist: Blurred White Overlay */
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             overflow: hidden;
             display: none;
+            transition: opacity 1s ease;
         }
 
         #launch-overlay.active {
             display: block;
         }
 
-        /* REALISTIC CURTAINS */
+        #launch-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* REALISTIC CURTAINS (Hidden/Unused) */
         .curtain-panel {
-            position: absolute;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            /* Deep Red Velvet Base + Image Texture */
-            background-color: #7f1d1d;
-            background-image:
-                linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, 0.4) 100%),
-                /* Side shadows */
-                url('images/launch_curtain.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            /* Physics-based easing for heavy fabric */
-            transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 20;
-            /* Deep shadow for depth */
-            box-shadow: 0 0 100px rgba(0, 0, 0, 0.9);
+            display: none;
         }
 
-        .curtain-left {
-            left: 0;
-            background-position: left center;
-            transform-origin: top left;
-        }
-
-        .curtain-right {
-            right: 0;
-            background-position: right center;
-            transform-origin: top right;
-        }
-
-        .curtain-left.open {
-            transform: translateX(-100%) skewX(5deg);
-        }
-
-        /* Slight skew for drag effect */
-        .curtain-right.open {
-            transform: translateX(100%) skewX(-5deg);
-        }
-
-        /* SPOTLIGHT GLOW behind content */
+        /* SPOTLIGHT GLOW */
         .spotlight-glow {
             position: absolute;
             top: 50%;
@@ -90,32 +61,20 @@
             transform: translate(-50%, -50%);
             width: 80vw;
             height: 80vh;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            /* Soft Red Glow */
             z-index: 25;
             pointer-events: none;
             animation: pulse-glow 4s infinite alternate;
         }
 
-        /* CONTENT CONTAINER */
+        /* CONTENT CONTAINER (Hidden) */
         .launch-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            perspective: 1000px;
-            /* For 3D feel */
-            transition: opacity 0.8s ease;
+            display: none;
         }
 
         .launch-content.fade-out {
-            opacity: 0;
-            pointer-events: none;
+            display: none;
         }
 
         /* GOD HEADER - BRIGHT GOLD & LEGIBLE */
@@ -228,23 +187,22 @@
         }
 
         /* RIBBON - CENTER & BIG */
+        /* RIBBON - CENTER & PROMINENT */
         #launch-ribbon {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 100vw;
-            /* Full width */
-            max-width: 900px;
-            /* Max cap */
+            width: 90vw;
+            max-width: 1000px;
+            /* Big Impact */
             height: auto;
             z-index: 60;
-            /* Topmost */
             cursor: pointer;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
-            opacity: 1;
-            /* Force visible */
-            transition: all 0.5s ease;
+            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.3));
+            /* Deep Shadow for 3D feel */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Bouncy Scale */
         }
 
         #launch-ribbon:hover {
@@ -261,20 +219,24 @@
                 transform: translate(-50%, -50%) scale(1);
             }
 
-            40% {
-                transform: translate(-50%, -50%) scale(1.1) rotate(2deg);
+            30% {
+                transform: translate(-50%, -50%) scale(0.9) rotate(-3deg);
             }
 
-            60% {
-                transform: translate(-50%, -50%) scale(1.1) rotate(-2deg);
+            /* Tension */
+            50% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
                 opacity: 1;
             }
 
+            /* Snap */
             100% {
-                transform: translate(-50%, -50%) scale(1.5);
+                transform: translate(-50%, -50%) scale(3);
                 opacity: 0;
-                filter: blur(10px);
+                filter: blur(20px);
             }
+
+            /* Explode */
         }
 
         @keyframes pulse-glow {
@@ -673,89 +635,174 @@
 <body class="font-body text-gray-800 bg-gray-50 flex flex-col min-h-screen">
 
     <!-- GRAND LAUNCH OVERLAY -->
+    <!-- GRAND LAUNCH OVERLAY (Minimalist) -->
     <div id="launch-overlay">
-        <!-- Curtains -->
-        <div class="curtain-panel curtain-left" id="curtain-left"></div>
-        <div class="curtain-panel curtain-right" id="curtain-right"></div>
-
         <!-- Ambient Glow -->
         <div class="spotlight-glow"></div>
 
-        <!-- Ribbon -->
+        <!-- Ribbon (KEPT & CENTERED) -->
         <img src="images/launch_ribbon.jpg" id="launch-ribbon" alt="Click to Launch">
 
-        <!-- Overlay Text Content -->
-        <div class="launch-content" id="launch-content">
-            <div class="god-header">
-                <span>|| જય શ્રી સ્વામિનારાયણ ||</span>
-                <span>|| શ્રી ગણેશાય નમ: ||</span>
-                <span>|| જય શ્રી ઉમિયા માતાજી ||</span>
-            </div>
-
-            <div class="launch-card">
-                <div class="launch-logo-circle">
-                    <img src="images/launch_logo.png" alt="Axar TechWave">
-                </div>
-                <h2>તારીખ :- 23-01-2026</h2>
-                <p class="highlight-gold">વસંત પંચમી</p>
-                <p>વિક્રમ સંવત: 2082</p>
-                <p>વાર :- શનિવાર</p>
-            </div>
-        </div>
+        <!-- Transition Logo (Hidden initially, appears on blast) -->
+        <img src="images/logo.png" id="launch-transition-logo" alt="Axar Logo"
+            style="opacity: 0; pointer-events: none;">
     </div>
 
     <!-- Notification Toast Container -->
     <!-- Top Bar -->
     <div class="bg-primary text-white py-2 text-sm">
-        <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
-            <div class="flex flex-wrap items-center justify-start sm:justify-start gap-4 w-full sm:w-auto mb-2 sm:mb-0">
-                <span class="flex items-center gap-1.5 whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
-                        </path>
-                    </svg>
-                    <a href="tel:+918849491216" class="hover:text-accent">+91 88494 91216</a>
-                </span>
-                <span class="flex items-center gap-1.5 break-all">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    axartechwave2025@gmail.com
-                </span>
-                <span class="hidden md:flex items-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                        </path>
-                    </svg>
-                    GSTIN: 24ACKFA5069R1ZQ
-                </span>
-            </div>
-            <div class="flex items-center justify-start sm:justify-end space-x-3 w-full sm:w-auto">
-                <a href="https://www.facebook.com/share/16Y7P5KLkk/" target="_blank"
-                    class="hover:text-accent transition-colors" aria-label="Facebook">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                </a>
-                <a href="https://www.instagram.com/axartechwave" target="_blank"
-                    class="hover:text-accent transition-colors" aria-label="Instagram">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.047-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465C9.673 2.013 10.03 2 12.488 2h.172zm-5.33 1.42c-2.406.106-2.634.25-2.936.368-.908.354-1.633 1.077-1.983 1.983-.118.302-.262.53-.368 2.936-.05 1.137-.066 1.77-.066 3.967v.147c0 2.227.016 2.871.065 4.025.107 2.404.25 2.633.368 2.935.353.908 1.076 1.633 1.982 1.983.303.118.531.262 2.935.368 1.137.05 1.771.066 3.967.066h.147c2.228 0 2.871-.016 4.025-.065 2.404-.107 2.633-.25 2.935-.368.908-.354 1.633-1.076 1.983-1.983.118-.303.262-.531.368-2.935.05-1.137.066-1.77.066-3.967v-.147c0-2.228-.016-2.871-.065-4.025-.107-2.404-.25-2.633-.368-2.935a5.418 5.418 0 00-1.982-1.983c-.303-.118-.531-.262-2.935-.368-1.137-.05-1.771-.066-3.967-.066h-.147c-2.228 0-2.871.016-4.025.065zm5.33 3.53a5.865 5.865 0 110 11.731 5.865 5.865 0 010-11.731zm0 1.954a3.91 3.91 0 100 7.82 3.91 3.91 0 000-7.82zm6.758-4.996a1.303 1.303 0 110 2.607 1.303 1.303 0 010-2.607z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </a>
-            </div>
+        <!-- ... content ... -->
+    </div>
+
+    <!-- ... Rest of Body ... -->
+
+    <!-- Launch Logic Script (Updated with Logo FLIP Animation) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('launch-overlay');
+            const ribbon = document.getElementById('launch-ribbon');
+            const transLogo = document.getElementById('launch-transition-logo');
+
+            // Allow Force Launch via URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceLaunch = urlParams.get('launch') === 'true';
+            const hasLaunched = sessionStorage.getItem('launch_completed');
+
+            if (!hasLaunched || forceLaunch) {
+                overlay.classList.add('active');
+
+                let isLaunched = false;
+
+                const startLaunch = () => {
+                    if (isLaunched) return;
+                    isLaunched = true;
+
+                    // 1. Hide Ribbon (Snap Disappear)
+                    ribbon.style.transition = 'all 0.3s ease';
+                    ribbon.style.transform = 'translate(-50%, -50%) scale(0)';
+                    ribbon.style.opacity = '0';
+
+                    // 2. LOGO: Zoom In to Center
+                    // Use CSS keyframe or simple transition
+                    transLogo.style.position = 'absolute';
+                    transLogo.style.top = '50%';
+                    transLogo.style.left = '50%';
+                    transLogo.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                    transLogo.style.width = '250px'; // Large Size
+                    transLogo.style.height = 'auto';
+                    transLogo.style.zIndex = '70';
+                    transLogo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Bouncy
+
+                    // Trigger reflow
+                    void transLogo.offsetWidth;
+
+                    // Reveal & Scale Up
+                    transLogo.style.opacity = '1';
+                    transLogo.style.transform = 'translate(-50%, -50%) scale(1.2)';
+
+                    // 3. Confetti Blast (Sync with Logo Pop)
+                    const duration = 4000;
+                    const end = Date.now() + duration;
+                    const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500'];
+
+                    (function frame() {
+                        confetti({ particleCount: 6, angle: 60, spread: 80, origin: { x: 0, y: 0.6 }, colors: colors });
+                        confetti({ particleCount: 6, angle: 120, spread: 80, origin: { x: 1, y: 0.6 }, colors: colors });
+                        if (Date.now() < end) requestAnimationFrame(frame);
+                    }());
+
+                    // 4. "Fly Back" to Header Logic (After delay)
+                    setTimeout(() => {
+                        // Find Goal Position (Header Logo)
+                        const headerLogo = document.querySelector('header img'); // Target the header logo
+                        if (headerLogo) {
+                            const rect = headerLogo.getBoundingClientRect();
+
+                            // Remove "centering" logic to allow manual positioning
+                            // We need to calculate the exact left/top to match the fixed/sticky header
+                            // Since overlay is fixed, client values work directly.
+
+                            transLogo.style.transition = 'all 1s ease-in-out';
+                            transLogo.style.transform = 'translate(0, 0) scale(1)'; // Reset scale
+                            transLogo.style.width = rect.width + 'px';
+                            transLogo.style.height = rect.height + 'px';
+                            // Move from 50%/50% center to specific Top/Left
+                            // Changing Top/Left is safer than transform for this "moving to a place" if we remove the transform centering
+
+                            transLogo.style.top = rect.top + 'px';
+                            transLogo.style.left = rect.left + 'px';
+                            // We must unset the 'translate(-50%, -50%)' for this to align top-left
+                            transLogo.style.transform = 'none';
+                        }
+
+                        // Fade out overlay background simultaneously
+                        overlay.style.backgroundColor = 'rgba(255,255,255,0)';
+                        overlay.style.backdropFilter = 'blur(0px)';
+                        overlay.style.webkitBackdropFilter = 'blur(0px)';
+
+                    }, 1500); // Wait 1.5s for user to admire logo
+
+                    // 5. Cleanup
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        sessionStorage.setItem('launch_completed', 'true');
+                    }, 2500); // 1.5s delay + 1s movement
+                };
+
+                document.addEventListener('keydown', (e) => { if (e.key === 'Enter') startLaunch(); });
+                ribbon.addEventListener('click', startLaunch);
+            }
+        });
+    </script>
+    <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+        <div class="flex flex-wrap items-center justify-start sm:justify-start gap-4 w-full sm:w-auto mb-2 sm:mb-0">
+            <span class="flex items-center gap-1.5 whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                    </path>
+                </svg>
+                <a href="tel:+918849491216" class="hover:text-accent">+91 88494 91216</a>
+            </span>
+            <span class="flex items-center gap-1.5 break-all">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    </path>
+                </svg>
+                axartechwave2025@gmail.com
+            </span>
+            <span class="hidden md:flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                    </path>
+                </svg>
+                GSTIN: 24ACKFA5069R1ZQ
+            </span>
         </div>
+        <div class="flex items-center justify-start sm:justify-end space-x-3 w-full sm:w-auto">
+            <a href="https://www.facebook.com/share/16Y7P5KLkk/" target="_blank"
+                class="hover:text-accent transition-colors" aria-label="Facebook">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </a>
+            <a href="https://www.instagram.com/axartechwave" target="_blank" class="hover:text-accent transition-colors"
+                aria-label="Instagram">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.047-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465C9.673 2.013 10.03 2 12.488 2h.172zm-5.33 1.42c-2.406.106-2.634.25-2.936.368-.908.354-1.633 1.077-1.983 1.983-.118.302-.262.53-.368 2.936-.05 1.137-.066 1.77-.066 3.967v.147c0 2.227.016 2.871.065 4.025.107 2.404.25 2.633.368 2.935.353.908 1.076 1.633 1.982 1.983.303.118.531.262 2.935.368 1.137.05 1.771.066 3.967.066h.147c2.228 0 2.871-.016 4.025-.065 2.404-.107 2.633-.25 2.935-.368.908-.354 1.633-1.076 1.983-1.983.118-.303.262-.531.368-2.935.05-1.137.066-1.77.066-3.967v-.147c0-2.228-.016-2.871-.065-4.025-.107-2.404-.25-2.633-.368-2.935a5.418 5.418 0 00-1.982-1.983c-.303-.118-.531-.262-2.935-.368-1.137-.05-1.771-.066-3.967-.066h-.147c-2.228 0-2.871.016-4.025.065zm5.33 3.53a5.865 5.865 0 110 11.731 5.865 5.865 0 010-11.731zm0 1.954a3.91 3.91 0 100 7.82 3.91 3.91 0 000-7.82zm6.758-4.996a1.303 1.303 0 110 2.607 1.303 1.303 0 010-2.607z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+    </div>
     </div>
 
     <!-- Header -->
@@ -2300,9 +2347,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const overlay = document.getElementById('launch-overlay');
             const ribbon = document.getElementById('launch-ribbon');
-            const curtainLeft = document.getElementById('curtain-left');
-            const curtainRight = document.getElementById('curtain-right');
-            const content = document.getElementById('launch-content');
 
             // Check if already launched in this session
             const hasLaunched = sessionStorage.getItem('launch_completed');
@@ -2315,30 +2359,37 @@
                 // Show Overlay
                 overlay.classList.add('active');
 
-                let isLaunching = false;
+                let isLaunched = false;
 
                 const startLaunch = () => {
-                    if (isLaunching) return;
-                    isLaunching = true;
+                    if (isLaunched) return;
+                    isLaunched = true;
 
-                    // 1. Confetti (Continuous)
-                    const duration = 5000;
+                    // 1. Creative Confetti Blast (More explosive)
+                    const duration = 4000;
                     const end = Date.now() + duration;
+                    const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500']; // Red, White, Gold, Orange-Red
 
                     (function frame() {
+                        // Left Cannon
                         confetti({
-                            particleCount: 5,
+                            particleCount: 7,
                             angle: 60,
-                            spread: 55,
-                            origin: { x: 0 },
-                            colors: ['#ff0000', '#daa520', '#ffffff'] // Red, Gold, White
+                            spread: 80,
+                            origin: { x: 0, y: 0.6 },
+                            colors: colors,
+                            gravity: 0.8,
+                            scalar: 1.2
                         });
+                        // Right Cannon
                         confetti({
-                            particleCount: 5,
+                            particleCount: 7,
                             angle: 120,
-                            spread: 55,
-                            origin: { x: 1 },
-                            colors: ['#ff0000', '#daa520', '#ffffff']
+                            spread: 80,
+                            origin: { x: 1, y: 0.6 },
+                            colors: colors,
+                            gravity: 0.8,
+                            scalar: 1.2
                         });
 
                         if (Date.now() < end) {
@@ -2346,27 +2397,19 @@
                         }
                     }());
 
-                    // 2. Animate Ribbon (Cut/Fade)
+                    // 2. Animate Ribbon (Explode)
                     ribbon.classList.add('cut');
 
-                    // 3. Fade out text
-                    content.classList.add('fade-out');
-
-                    // 4. Open Curtains (Delayed slightly for effect)
+                    // 3. Fade out overlay (Reveal Site)
                     setTimeout(() => {
-                        curtainLeft.classList.add('open');
-                        curtainRight.classList.add('open');
-                    }, 500);
+                        overlay.classList.add('fade-out');
+                    }, 500); // Wait 0.5s for ribbon to snap
 
-                    // 5. Cleanup (Remove overlay allow interaction with site below)
+                    // 4. Cleanup
                     setTimeout(() => {
-                        overlay.style.pointerEvents = 'none'; // Passthrough immediately once open
+                        overlay.style.display = 'none';
                         sessionStorage.setItem('launch_completed', 'true');
-                    }, 3500); // 3s curtain animation + buffer
-
-                    setTimeout(() => {
-                        overlay.style.display = 'none'; // Fully hide
-                    }, 4000);
+                    }, 2000);
                 };
 
                 // Triggers: Enter Key or Click on Ribbon
