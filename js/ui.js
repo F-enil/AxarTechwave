@@ -1396,6 +1396,16 @@ const UI = {
         }
     },
 
+    setupAuthObserver() {
+        this.checkAuth();
+        // Optional: Listen for storage events if multiple tabs are used
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'user' || e.key === 'token') {
+                this.checkAuth();
+            }
+        });
+    },
+
     checkAuth() {
         const user = Auth.getUser();
 
