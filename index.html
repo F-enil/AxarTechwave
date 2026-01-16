@@ -31,9 +31,11 @@
             height: 100vh;
             z-index: 99999;
             /* Minimalist: Blurred White Overlay */
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            /* Minimalist: Blurred White Overlay */
+            background: rgba(255, 255, 255, 0.95);
+            /* More opaque, no blur cost */
+            /* backdrop-filter: blur(12px); <-- CRASH RISK ON MOBILE */
+            /* -webkit-backdrop-filter: blur(12px); */
             overflow: hidden;
             display: none;
             transition: opacity 1s ease;
@@ -283,6 +285,12 @@
                 align-items: center;
                 gap: 0.5rem;
                 top: 5%;
+            }
+
+            /* SAFETY: Disable heavy animations on mobile */
+            .launch-card {
+                animation: none !important;
+                transform: none !important;
             }
         }
     </style>

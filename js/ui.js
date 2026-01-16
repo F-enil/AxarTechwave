@@ -1453,22 +1453,29 @@ const UI = {
                         || 'https://via.placeholder.com/150';
 
                     return `
-                    <div class="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-                        <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity" onclick="showProductDetail(${item.variant.product.id})">
-                            <img src="${image}" alt="${item.variant.product.title}" class="w-20 h-20 object-contain rounded bg-gray-50">
-                            <div>
-                                <h4 class="font-bold text-gray-800">${item.variant.product.title}</h4>
-                                <p class="text-gray-500 text-sm">₹${item.variant.prices[0].basePrice}</p>
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-4 rounded-lg shadow-sm gap-4">
+                        <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity w-full md:w-auto" onclick="showProductDetail(${item.variant.product.id})">
+                            <img src="${image}" alt="${item.variant.product.title}" class="w-16 h-16 md:w-20 md:h-20 object-contain rounded bg-gray-50 flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-800 text-sm md:text-base break-words">${item.variant.product.title}</h4>
+                                <p class="text-gray-500 text-xs md:text-sm">₹${item.variant.prices[0].basePrice}</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4">
+                        
+                        <div class="flex items-center justify-between w-full md:w-auto space-x-0 md:space-x-4 pl-0 md:pl-4 border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0">
+                            <!-- Quantity -->
                             <div class="flex items-center border border-gray-300 rounded">
-                                <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200" onclick="updateCartItem(${item.id}, ${item.quantity - 1})">-</button>
-                                <span class="px-3 py-1">${item.quantity}</span>
-                                <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200" onclick="updateCartItem(${item.id}, ${item.quantity + 1})">+</button>
+                                <button class="px-2 py-1 md:px-3 bg-gray-100 hover:bg-gray-200 text-sm" onclick="updateCartItem(${item.id}, ${item.quantity - 1})">-</button>
+                                <span class="px-3 py-1 text-sm font-medium w-8 text-center">${item.quantity}</span>
+                                <button class="px-2 py-1 md:px-3 bg-gray-100 hover:bg-gray-200 text-sm" onclick="updateCartItem(${item.id}, ${item.quantity + 1})">+</button>
                             </div>
-                            <p class="font-bold">₹${item.variant.prices[0].basePrice * item.quantity}</p>
-                            <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700">🗑️</button>
+                            
+                            <div class="flex items-center gap-4">
+                                <p class="font-bold text-sm md:text-base">₹${(item.variant.prices[0].basePrice * item.quantity).toLocaleString()}</p>
+                                <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-1">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `}).join('');

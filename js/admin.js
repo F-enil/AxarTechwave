@@ -1143,14 +1143,14 @@ const Admin = {
         const modalHtml = `
             <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" id="order-modal">
                 <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 border-b flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <h3 class="text-xl font-bold">Order #${order.customId || order.id} Details</h3>
+                    <div class="p-6 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full">
+                            <h3 class="text-xl font-bold break-all">Order #${order.customId || order.id}</h3>
                             <button onclick="Admin.downloadInvoice(${order.id})" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-2">
-                                <span>📄</span> Download Invoice
+                                <span>📄</span> Invoice
                             </button>
                         </div>
-                        <button onclick="document.getElementById('order-modal').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                        <button onclick="document.getElementById('order-modal').remove()" class="text-gray-500 hover:text-gray-700 text-2xl absolute top-4 right-4 md:static">&times;</button>
                     </div>
                     <div class="p-6 space-y-6">
                         <!-- Status & Meta -->

@@ -304,7 +304,7 @@ const Checkout = {
             } else {
                 // Online Payment (Razorpay)
                 const options = {
-                    "key": "rzp_test_RygKV0wepSF5SR",
+                    "key": window.CONFIG?.RAZORPAY_KEY || "rzp_test_RygKV0wepSF5SR", // Fallback for safety
                     "amount": Math.round(order.total * 100), // paise
                     "currency": "INR",
                     "name": "Axar TechWave",
