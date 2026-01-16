@@ -143,8 +143,8 @@ const UI = {
             }
         };
 
-        // Check every 10 seconds
-        setInterval(checkMaintenance, 10000);
+        // Check every 3 seconds for faster response
+        setInterval(checkMaintenance, 3000);
         // Also check once on load
         checkMaintenance();
     },
