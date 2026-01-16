@@ -648,8 +648,8 @@
     <!-- Notification Toast Container -->
     <!-- Top Bar -->
     <div class="bg-primary text-white py-2 text-sm">
-        <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
-            <div class="flex flex-wrap items-center justify-start sm:justify-start gap-4 w-full sm:w-auto mb-2 sm:mb-0">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 w-full md:w-auto">
                 <span class="flex items-center gap-1.5 whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
@@ -2237,84 +2237,7 @@
         </div>
     </div>
     <!-- Launch Logic Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const overlay = document.getElementById('launch-overlay');
-            const ribbon = document.getElementById('launch-ribbon');
-
-            // Check if already launched in this session
-            const hasLaunched = sessionStorage.getItem('launch_completed');
-
-            // Debug override/Force show specific param ?launch=true
-            const urlParams = new URLSearchParams(window.location.search);
-            const forceLaunch = urlParams.get('launch') === 'true';
-
-            if (!hasLaunched || forceLaunch) {
-                // Show Overlay
-                overlay.classList.add('active');
-
-                let isLaunched = false;
-
-                const startLaunch = () => {
-                    if (isLaunched) return;
-                    isLaunched = true;
-
-                    // 1. Creative Confetti Blast (More explosive)
-                    const duration = 4000;
-                    const end = Date.now() + duration;
-                    const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500']; // Red, White, Gold, Orange-Red
-
-                    (function frame() {
-                        // Left Cannon
-                        confetti({
-                            particleCount: 7,
-                            angle: 60,
-                            spread: 80,
-                            origin: { x: 0, y: 0.6 },
-                            colors: colors,
-                            gravity: 0.8,
-                            scalar: 1.2
-                        });
-                        // Right Cannon
-                        confetti({
-                            particleCount: 7,
-                            angle: 120,
-                            spread: 80,
-                            origin: { x: 1, y: 0.6 },
-                            colors: colors,
-                            gravity: 0.8,
-                            scalar: 1.2
-                        });
-
-                        if (Date.now() < end) {
-                            requestAnimationFrame(frame);
-                        }
-                    }());
-
-                    // 2. Animate Ribbon (Explode)
-                    ribbon.classList.add('cut');
-
-                    // 3. Fade out overlay (Reveal Site)
-                    setTimeout(() => {
-                        overlay.classList.add('fade-out');
-                    }, 500); // Wait 0.5s for ribbon to snap
-
-                    // 4. Cleanup
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        sessionStorage.setItem('launch_completed', 'true');
-                    }, 2000);
-                };
-
-                // Triggers: Enter Key or Click on Ribbon
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') startLaunch();
-                });
-
-                ribbon.addEventListener('click', startLaunch);
-            }
-        });
-    </script>
+    <!-- Launch Logic Script (Duplicate Removed) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Check Admin Status
