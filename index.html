@@ -2367,22 +2367,13 @@
                 // Start Zoom
                 transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(0deg)';
 
-                // Phase 2: Spin & Confetti (Start spin after zoom starts or simultaneously)
-                // Let's spin continuously during the "Hold" phase
-                // Merging with zoom might be too fast. Let's start spin AFTER zoom hits? 
-                // Or just spin ALONG with zoom? "when logo when in center make logo spin" -> implies spinning while holding.
-
-                // Let's try this:
-                // T=0: Zoom start.
-                // T=1.5s: Zoom done. Start Spin.
-                // T=4.5s: Spin done. Start Fly.
-
-                // Re-timing based on "when in center":
+                // Phase 2: Spin & Confetti
+                // Spin starts after zoom (1.5s delay)
                 setTimeout(() => {
-                    // Start Spin (Medium Speed)
-                    transLogo.style.transition = 'transform 3s linear';
+                    // FASTER SPIN (2s instead of 3s)
+                    transLogo.style.transition = 'transform 2s linear';
                     transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(360deg)';
-                }, 1500); // Provide zoom time to finish first
+                }, 1500);
 
                 // Phase 2b: Confetti Blast
                 const duration = 4000;
@@ -2395,7 +2386,8 @@
                     if (Date.now() < end) requestAnimationFrame(frame);
                 }());
 
-                // Phase 3: Fly to Header (After spin ends at 4.5s)
+                // Phase 3: Fly to Header
+                // Start after Zoom(1.5s) + Spin(2s) + slight hold = ~4s
                 setTimeout(() => {
                     const headerLogo = document.querySelector('header img');
                     if (headerLogo) {
@@ -2403,23 +2395,22 @@
 
                         // Fly Animation (1.5s)
                         transLogo.style.transition = 'all 1.5s ease-in-out';
-                        // Maintain the 360deg rotation so it doesn't spin back
-                        // Using translate(0,0) requires top/left to be set to target
+
                         transLogo.style.width = rect.width + 'px';
                         transLogo.style.height = rect.height + 'px';
                         transLogo.style.top = rect.top + 'px';
                         transLogo.style.left = rect.left + 'px';
-                        // Important: reset translate but keep rotation 360 (which is visually 0)
-                        transLogo.style.transform = 'translate(0, 0) scale(1) rotate(360deg)';
+                        // SPIN WHILE FLYING: Go from 360deg -> 720deg (One full spin during flight)
+                        transLogo.style.transform = 'translate(0, 0) scale(1) rotate(720deg)';
                     }
 
-                }, 4500); // 1.5s Zoom + 3s Spin = 4.5s
+                }, 4000);
 
-                // Phase 4: Finish (Total duration ~6s)
+                // Phase 4: Finish (4s start + 1.5s fly + buffer)
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     isAnimating = false;
-                }, 6000); // 4.5s + 1.5s flight + buffer
+                }, 6000);
             };
 
             // 4. Attach Listener
