@@ -22,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* Launch Overlay Styles */
+        /* PRESENCE: Grand Launch Overlay */
         #launch-overlay {
             position: fixed;
             top: 0;
@@ -30,54 +30,73 @@
             width: 100%;
             height: 100vh;
             z-index: 99999;
-            background: transparent;
-            /* Allows transparency when curtains open */
+            background: radial-gradient(circle at center, #2a0a0a, #000);
+            /* Dark backing */
             overflow: hidden;
             display: none;
-            /* Hidden by default, toggled via JS */
         }
 
         #launch-overlay.active {
             display: block;
         }
 
-        /* Curtains */
+        /* REALISTIC CURTAINS */
         .curtain-panel {
             position: absolute;
             top: 0;
             width: 50%;
             height: 100%;
-            background-image: url('images/launch_curtain.jpg');
-            background-size: 200% 100%;
-            /* Stretch width to double */
+            /* Deep Red Velvet Base + Image Texture */
+            background-color: #7f1d1d;
+            background-image:
+                linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, 0.4) 100%),
+                /* Side shadows */
+                url('images/launch_curtain.jpg');
+            background-size: cover;
             background-repeat: no-repeat;
-            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Physics-based easing for heavy fabric */
+            transition: transform 3.5s cubic-bezier(0.25, 1, 0.5, 1);
             z-index: 20;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            /* Deep shadow for depth */
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.9);
         }
 
         .curtain-left {
             left: 0;
             background-position: left center;
-            transform-origin: left;
+            transform-origin: top left;
         }
 
         .curtain-right {
             right: 0;
             background-position: right center;
-            /* Show right half */
-            transform-origin: right;
+            transform-origin: top right;
         }
 
         .curtain-left.open {
-            transform: translateX(-100%);
+            transform: translateX(-100%) skewX(5deg);
         }
 
+        /* Slight skew for drag effect */
         .curtain-right.open {
-            transform: translateX(100%);
+            transform: translateX(100%) skewX(-5deg);
         }
 
-        /* Content On Top of Curtains */
+        /* SPOTLIGHT GLOW behind content */
+        .spotlight-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            z-index: 25;
+            pointer-events: none;
+            animation: pulse-glow 4s infinite alternate;
+        }
+
+        /* CONTENT CONTAINER */
         .launch-content {
             position: absolute;
             top: 0;
@@ -85,113 +104,180 @@
             width: 100%;
             height: 100%;
             z-index: 30;
-            /* Above curtains */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: 'Rasa', serif;
-            transition: opacity 1s ease;
-            pointer-events: none;
-            /* Let clicks pass to ribbon if needed */
+            perspective: 1000px;
+            /* For 3D feel */
+            transition: opacity 0.8s ease;
         }
 
         .launch-content.fade-out {
             opacity: 0;
+            pointer-events: none;
         }
 
+        /* GOD HEADER - GOLDEN TEXT */
         .god-header {
             position: absolute;
-            top: 5%;
+            top: 8%;
             width: 100%;
             display: flex;
-            justify-content: space-around;
-            color: #5a3e1b;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+
+            font-family: 'Rasa', serif;
             font-weight: 700;
-            font-size: 1.2rem;
-            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+
+            /* Gold Gradient Text */
+            background: linear-gradient(to bottom, #cfc09f 22%, #634f2c 24%, #cfc09f 26%, #cfc09f 27%, #ffecb3 40%, #3a2c0f 78%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+        }
+
+        /* PREMIUM GLASS CARD */
+        .launch-card {
+            background: rgba(255, 255, 255, 0.1);
+            /* Frosted Glass */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+
+            padding: 3rem 5rem;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+
+            /* Gold Border Glow */
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(218, 165, 32, 0.5),
+                /* Inner gold ring */
+                0 0 30px rgba(218, 165, 32, 0.2);
+            /* Outer gold glow */
+
+            transform-style: preserve-3d;
+            animation: float-card 6s ease-in-out infinite;
         }
 
         .launch-logo-circle {
-            width: 15rem;
-            height: 15rem;
-            background: white;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 2rem auto;
+            background: radial-gradient(circle, #fff 60%, #f0f0f0 100%);
             border-radius: 50%;
-            padding: 1rem;
-            box-shadow: 0 0 30px rgba(218, 165, 32, 0.6);
+            padding: 15px;
             border: 4px solid #daa520;
-            margin-bottom: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: float 3s ease-in-out infinite;
         }
 
         .launch-logo-circle img {
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
         }
 
-        .launch-card {
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #daa520;
-            padding: 2rem 4rem;
-            border-radius: 1rem;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-
-        .launch-card .btn-hint {
-            background: #555;
-            color: white;
-            padding: 0.2rem 0.8rem;
-            border-radius: 0.3rem;
-            font-size: 0.9rem;
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            /* User asked to hide guide */
-        }
-
         .launch-card h2 {
-            color: #e74c3c;
-            font-size: 2.2rem;
+            font-family: 'Rasa', serif;
+            color: #fff;
+            font-size: 3rem;
             margin: 0;
             font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Fallback */
+            color: #ff4d4d;
         }
 
         .launch-card p {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            color: #eaeaea;
+            font-weight: 500;
             margin: 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* Ribbon */
+        .highlight-gold {
+            color: #f1c40f;
+            font-weight: 700;
+        }
+
+        /* RIBBON PHYSICS */
         #launch-ribbon {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height: 60vh;
-            /* Adjust height to match image aspect */
+            width: 80%;
+            /* Ensure it spans */
+            max-width: 800px;
+            height: auto;
             z-index: 40;
             cursor: pointer;
-            transition: transform 0.5s ease, opacity 0.5s ease;
-            pointer-events: auto;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+            transition: all 0.5s ease;
+        }
+
+        #launch-ribbon:hover {
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         #launch-ribbon.cut {
-            transform: translate(-50%, -50%) scale(1.5);
-            opacity: 0;
+            animation: ribbon-snap 0.6s forwards ease-out;
             pointer-events: none;
         }
 
-        @keyframes float {
+        @keyframes ribbon-snap {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            40% {
+                transform: translate(-50%, -50%) scale(1.1) rotate(2deg);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(1.1) rotate(-2deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+                filter: blur(10px);
+            }
+        }
+
+        @keyframes pulse-glow {
+            from {
+                opacity: 0.5;
+            }
+
+            to {
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes float-card {
 
             0%,
             100% {
@@ -199,7 +285,32 @@
             }
 
             50% {
-                transform: translateY(-15px);
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .launch-card {
+                padding: 1.5rem;
+                width: 90%;
+            }
+
+            .launch-logo-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .launch-card h2 {
+                font-size: 2rem;
+            }
+
+            .god-header {
+                font-size: 1rem;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+                top: 5%;
             }
         }
     </style>
@@ -557,8 +668,11 @@
         <div class="curtain-panel curtain-left" id="curtain-left"></div>
         <div class="curtain-panel curtain-right" id="curtain-right"></div>
 
+        <!-- Ambient Glow -->
+        <div class="spotlight-glow"></div>
+
         <!-- Ribbon -->
-        <img src="images/launch_ribbon.jpg" id="launch-ribbon" alt="Ribbon">
+        <img src="images/launch_ribbon.jpg" id="launch-ribbon" alt="Click to Launch">
 
         <!-- Overlay Text Content -->
         <div class="launch-content" id="launch-content">
@@ -568,14 +682,12 @@
                 <span>|| જય શ્રી ઉમિયા માતાજી ||</span>
             </div>
 
-            <div class="launch-logo-circle">
-                <img src="images/launch_logo.png" alt="Axar TechWave">
-            </div>
-
             <div class="launch-card">
-                <!-- <div class="btn-hint">Press ENTER to Launch</div> -->
+                <div class="launch-logo-circle">
+                    <img src="images/launch_logo.png" alt="Axar TechWave">
+                </div>
                 <h2>તારીખ :- 23-01-2026</h2>
-                <p style="color: #004080;">વસંત પંચમી</p>
+                <p class="highlight-gold">વસંત પંચમી</p>
                 <p>વિક્રમ સંવત: 2082</p>
                 <p>વાર :- શનિવાર</p>
             </div>
