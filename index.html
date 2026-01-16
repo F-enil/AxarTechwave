@@ -635,15 +635,12 @@
 <body class="font-body text-gray-800 bg-gray-50 flex flex-col min-h-screen">
 
     <!-- GRAND LAUNCH OVERLAY -->
-    <!-- GRAND LAUNCH OVERLAY (Minimalist) -->
-    <div id="launch-overlay">
+    <!-- GRAND LAUNCH OVERLAY (Admin Only - Hidden by Default) -->
+    <div id="launch-overlay" style="display: none;">
         <!-- Ambient Glow -->
         <div class="spotlight-glow"></div>
 
-        <!-- Ribbon (KEPT & CENTERED) -->
-        <img src="images/launch_ribbon.jpg" id="launch-ribbon" alt="Click to Launch">
-
-        <!-- Transition Logo (Hidden initially, appears on blast) -->
+        <!-- Transition Logo (Hidden initially) -->
         <img src="images/logo.png" id="launch-transition-logo" alt="Axar Logo"
             style="opacity: 0; pointer-events: none;">
     </div>
@@ -656,102 +653,101 @@
 
     <!-- ... Rest of Body ... -->
 
-    <!-- Launch Logic Script (Updated with Logo FLIP Animation) -->
+    <!-- Launch Logic Script (Admin Trigger Only) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const overlay = document.getElementById('launch-overlay');
-            const ribbon = document.getElementById('launch-ribbon');
-            const transLogo = document.getElementById('launch-transition-logo');
+            // 1. Check Admin Status
+            const userJson = localStorage.getItem('user');
+            let isAdmin = false;
+            try {
+                const user = userJson ? JSON.parse(userJson) : null;
+                isAdmin = user && user.role === 'admin';
+            } catch (e) { console.error('Auth Check Failed', e); }
 
-            // Allow Force Launch via URL
+            // URL Override for testing even if not logged in
             const urlParams = new URLSearchParams(window.location.search);
-            const forceLaunch = urlParams.get('launch') === 'true';
-            const hasLaunched = sessionStorage.getItem('launch_completed');
+            if (urlParams.get('admin') === 'true') isAdmin = true;
 
-            if (!hasLaunched || forceLaunch) {
-                overlay.classList.add('active');
+            if (!isAdmin) return; // Exit if not admin
 
-                let isLaunched = false;
+            // 2. Setup Elements
+            const overlay = document.getElementById('launch-overlay');
+            const transLogo = document.getElementById('launch-transition-logo');
+            let isAnimating = false;
 
-                const startLaunch = () => {
-                    if (isLaunched) return;
-                    isLaunched = true;
+            // 3. Define Animation Sequence
+            const triggerLaunchAnimation = () => {
+                if (isAnimating) return;
+                isAnimating = true;
 
-                    // 1. Hide Ribbon (Snap Disappear)
-                    ribbon.style.transition = 'all 0.3s ease';
-                    ribbon.style.transform = 'translate(-50%, -50%) scale(0)';
-                    ribbon.style.opacity = '0';
+                // Reset State
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+                overlay.style.backgroundColor = 'rgba(255,255,255,0.85)'; // Flash white bg
+                overlay.style.backdropFilter = 'blur(10px)';
 
-                    // 2. LOGO: Zoom In to Center
-                    // Use CSS keyframe or simple transition
-                    transLogo.style.position = 'absolute';
-                    transLogo.style.top = '50%';
-                    transLogo.style.left = '50%';
-                    transLogo.style.transform = 'translate(-50%, -50%) scale(0.5)';
-                    transLogo.style.width = '250px'; // Large Size
-                    transLogo.style.height = 'auto';
-                    transLogo.style.zIndex = '70';
-                    transLogo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Bouncy
+                // Reset Logo
+                transLogo.style.opacity = '0';
+                transLogo.style.transition = 'none';
+                transLogo.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                transLogo.style.position = 'absolute';
+                transLogo.style.top = '50%';
+                transLogo.style.left = '50%';
+                transLogo.style.width = '250px';
+                transLogo.style.height = 'auto';
 
-                    // Trigger reflow
-                    void transLogo.offsetWidth;
+                // Force Reflow
+                void transLogo.offsetWidth;
 
-                    // Reveal & Scale Up
-                    transLogo.style.opacity = '1';
-                    transLogo.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                // Phase 1: Zoom In Center
+                transLogo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                transLogo.style.opacity = '1';
+                transLogo.style.transform = 'translate(-50%, -50%) scale(1.5)';
 
-                    // 3. Confetti Blast (Sync with Logo Pop)
-                    const duration = 4000;
-                    const end = Date.now() + duration;
-                    const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500'];
+                // Phase 2: Confetti Blast
+                const duration = 4000;
+                const end = Date.now() + duration;
+                const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500'];
 
-                    (function frame() {
-                        confetti({ particleCount: 6, angle: 60, spread: 80, origin: { x: 0, y: 0.6 }, colors: colors });
-                        confetti({ particleCount: 6, angle: 120, spread: 80, origin: { x: 1, y: 0.6 }, colors: colors });
-                        if (Date.now() < end) requestAnimationFrame(frame);
-                    }());
+                (function frame() {
+                    confetti({ particleCount: 6, angle: 60, spread: 80, origin: { x: 0, y: 0.6 }, colors: colors });
+                    confetti({ particleCount: 6, angle: 120, spread: 80, origin: { x: 1, y: 0.6 }, colors: colors });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
 
-                    // 4. "Fly Back" to Header Logic (After delay)
-                    setTimeout(() => {
-                        // Find Goal Position (Header Logo)
-                        const headerLogo = document.querySelector('header img'); // Target the header logo
-                        if (headerLogo) {
-                            const rect = headerLogo.getBoundingClientRect();
+                // Phase 3: Fly to Header (After 2s hold)
+                setTimeout(() => {
+                    const headerLogo = document.querySelector('header img');
+                    if (headerLogo) {
+                        const rect = headerLogo.getBoundingClientRect();
 
-                            // Remove "centering" logic to allow manual positioning
-                            // We need to calculate the exact left/top to match the fixed/sticky header
-                            // Since overlay is fixed, client values work directly.
+                        transLogo.style.transition = 'all 1s ease-in-out';
+                        transLogo.style.transform = 'translate(0, 0) scale(1)';
+                        transLogo.style.width = rect.width + 'px';
+                        transLogo.style.height = rect.height + 'px';
+                        transLogo.style.top = rect.top + 'px';
+                        transLogo.style.left = rect.left + 'px';
+                    }
 
-                            transLogo.style.transition = 'all 1s ease-in-out';
-                            transLogo.style.transform = 'translate(0, 0) scale(1)'; // Reset scale
-                            transLogo.style.width = rect.width + 'px';
-                            transLogo.style.height = rect.height + 'px';
-                            // Move from 50%/50% center to specific Top/Left
-                            // Changing Top/Left is safer than transform for this "moving to a place" if we remove the transform centering
+                    // Fade out background
+                    overlay.style.backgroundColor = 'rgba(255,255,255,0)';
+                    overlay.style.backdropFilter = 'blur(0px)';
 
-                            transLogo.style.top = rect.top + 'px';
-                            transLogo.style.left = rect.left + 'px';
-                            // We must unset the 'translate(-50%, -50%)' for this to align top-left
-                            transLogo.style.transform = 'none';
-                        }
+                }, 2000);
 
-                        // Fade out overlay background simultaneously
-                        overlay.style.backgroundColor = 'rgba(255,255,255,0)';
-                        overlay.style.backdropFilter = 'blur(0px)';
-                        overlay.style.webkitBackdropFilter = 'blur(0px)';
+                // Phase 4: Finish
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    isAnimating = false;
+                }, 3200); // 2s wait + 1s fly + buffer
+            };
 
-                    }, 1500); // Wait 1.5s for user to admire logo
+            // 4. Attach Listener
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') triggerLaunchAnimation();
+            });
 
-                    // 5. Cleanup
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        sessionStorage.setItem('launch_completed', 'true');
-                    }, 2500); // 1.5s delay + 1s movement
-                };
-
-                document.addEventListener('keydown', (e) => { if (e.key === 'Enter') startLaunch(); });
-                ribbon.addEventListener('click', startLaunch);
-            }
+            console.log('Ez Launch Ready for Admin');
         });
     </script>
     <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
