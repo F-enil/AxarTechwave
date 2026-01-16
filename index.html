@@ -2344,8 +2344,9 @@
                 // Reset State
                 overlay.style.display = 'block';
                 overlay.style.opacity = '1';
-                overlay.style.backgroundColor = 'rgba(255,255,255,0.85)'; // Flash white bg
-                overlay.style.backdropFilter = 'blur(10px)';
+                // REMOVED WHITE FLASH - Use Dark Glass Effect
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                overlay.style.backdropFilter = 'blur(8px)';
 
                 // Reset Logo
                 transLogo.style.opacity = '0';
@@ -2360,8 +2361,8 @@
                 // Force Reflow
                 void transLogo.offsetWidth;
 
-                // Phase 1: Zoom In Center
-                transLogo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                // Phase 1: Zoom In Center (Slower: 1.5s)
+                transLogo.style.transition = 'all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 transLogo.style.opacity = '1';
                 transLogo.style.transform = 'translate(-50%, -50%) scale(1.5)';
 
@@ -2376,13 +2377,14 @@
                     if (Date.now() < end) requestAnimationFrame(frame);
                 }());
 
-                // Phase 3: Fly to Header (After 2s hold)
+                // Phase 3: Fly to Header (After 3s hold - Total time ~4.5s at end of flight)
                 setTimeout(() => {
                     const headerLogo = document.querySelector('header img');
                     if (headerLogo) {
                         const rect = headerLogo.getBoundingClientRect();
 
-                        transLogo.style.transition = 'all 1s ease-in-out';
+                        // Slower Flight: 1.5s
+                        transLogo.style.transition = 'all 1.5s ease-in-out';
                         transLogo.style.transform = 'translate(0, 0) scale(1)';
                         transLogo.style.width = rect.width + 'px';
                         transLogo.style.height = rect.height + 'px';
@@ -2390,17 +2392,17 @@
                         transLogo.style.left = rect.left + 'px';
                     }
 
-                    // Fade out background
-                    overlay.style.backgroundColor = 'rgba(255,255,255,0)';
+                    // Fade out background slightly before flight ends
+                    overlay.style.backgroundColor = 'rgba(0,0,0,0)';
                     overlay.style.backdropFilter = 'blur(0px)';
 
-                }, 2000);
+                }, 3000);
 
-                // Phase 4: Finish
+                // Phase 4: Finish (Total duration ~5s)
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     isAnimating = false;
-                }, 3200); // 2s wait + 1s fly + buffer
+                }, 4800); // 3s wait + 1.5s flight + buffer
             };
 
             // 4. Attach Listener
