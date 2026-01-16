@@ -25,6 +25,7 @@
         }
     </style>
 </head>
+<script src="js/config.js?v=2.2"></script>
 
 <body class="bg-gray-50 flex items-center justify-center min-h-screen wave-bg text-white">
     <div class="container mx-auto px-4 text-center z-10">
@@ -52,11 +53,12 @@
         // Simple check to see if we can go back home
         async function checkStatus() {
             try {
-                // Use relative path for production compatibility, or hardcoded if necessary
-                // Assuming /api is proxied or absolute path is needed.
-                // Best to try relative first if hosted on same domain.
-                const apiUrl = '/api';
-                // Fallback for development if relative doesn't work (optional)
+                // Use CONFIG.API_URL for production compatibility
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
+                    ? CONFIG.API_URL
+                    : '/api';
+
+                console.log('Checking maintenance status against:', apiUrl);
 
                 const res = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`, {
                     cache: "no-store",
