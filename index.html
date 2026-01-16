@@ -2344,14 +2344,14 @@
                 // Reset State
                 overlay.style.display = 'block';
                 overlay.style.opacity = '1';
-                // REMOVED WHITE FLASH - Use Dark Glass Effect
-                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                overlay.style.backdropFilter = 'blur(8px)';
+                // TRANSPARENT BACKGROUND (As requested)
+                overlay.style.backgroundColor = 'transparent';
+                overlay.style.backdropFilter = 'none'; // Clear blur if transparent
 
                 // Reset Logo
                 transLogo.style.opacity = '0';
                 transLogo.style.transition = 'none';
-                transLogo.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                transLogo.style.transform = 'translate(-50%, -50%) scale(0.5) rotate(0deg)';
                 transLogo.style.position = 'absolute';
                 transLogo.style.top = '50%';
                 transLogo.style.left = '50%';
@@ -2361,12 +2361,30 @@
                 // Force Reflow
                 void transLogo.offsetWidth;
 
-                // Phase 1: Zoom In Center (Slower: 1.5s)
+                // Phase 1: Zoom In Center (1.5s)
                 transLogo.style.transition = 'all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 transLogo.style.opacity = '1';
-                transLogo.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                // Start Zoom
+                transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(0deg)';
 
-                // Phase 2: Confetti Blast
+                // Phase 2: Spin & Confetti (Start spin after zoom starts or simultaneously)
+                // Let's spin continuously during the "Hold" phase
+                // Merging with zoom might be too fast. Let's start spin AFTER zoom hits? 
+                // Or just spin ALONG with zoom? "when logo when in center make logo spin" -> implies spinning while holding.
+
+                // Let's try this:
+                // T=0: Zoom start.
+                // T=1.5s: Zoom done. Start Spin.
+                // T=4.5s: Spin done. Start Fly.
+
+                // Re-timing based on "when in center":
+                setTimeout(() => {
+                    // Start Spin (Medium Speed)
+                    transLogo.style.transition = 'transform 3s linear';
+                    transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(360deg)';
+                }, 1500); // Provide zoom time to finish first
+
+                // Phase 2b: Confetti Blast
                 const duration = 4000;
                 const end = Date.now() + duration;
                 const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500'];
@@ -2377,32 +2395,31 @@
                     if (Date.now() < end) requestAnimationFrame(frame);
                 }());
 
-                // Phase 3: Fly to Header (After 3s hold - Total time ~4.5s at end of flight)
+                // Phase 3: Fly to Header (After spin ends at 4.5s)
                 setTimeout(() => {
                     const headerLogo = document.querySelector('header img');
                     if (headerLogo) {
                         const rect = headerLogo.getBoundingClientRect();
 
-                        // Slower Flight: 1.5s
+                        // Fly Animation (1.5s)
                         transLogo.style.transition = 'all 1.5s ease-in-out';
-                        transLogo.style.transform = 'translate(0, 0) scale(1)';
+                        // Maintain the 360deg rotation so it doesn't spin back
+                        // Using translate(0,0) requires top/left to be set to target
                         transLogo.style.width = rect.width + 'px';
                         transLogo.style.height = rect.height + 'px';
                         transLogo.style.top = rect.top + 'px';
                         transLogo.style.left = rect.left + 'px';
+                        // Important: reset translate but keep rotation 360 (which is visually 0)
+                        transLogo.style.transform = 'translate(0, 0) scale(1) rotate(360deg)';
                     }
 
-                    // Fade out background slightly before flight ends
-                    overlay.style.backgroundColor = 'rgba(0,0,0,0)';
-                    overlay.style.backdropFilter = 'blur(0px)';
+                }, 4500); // 1.5s Zoom + 3s Spin = 4.5s
 
-                }, 3000);
-
-                // Phase 4: Finish (Total duration ~5s)
+                // Phase 4: Finish (Total duration ~6s)
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     isAnimating = false;
-                }, 4800); // 3s wait + 1.5s flight + buffer
+                }, 6000); // 4.5s + 1.5s flight + buffer
             };
 
             // 4. Attach Listener
