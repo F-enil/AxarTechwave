@@ -47,13 +47,6 @@ const Admin = {
         }
         this.user = user;
         this.renderLayout(user);
-        // Check for launch page preview (first time login/session)
-        if (!sessionStorage.getItem('launchSeen')) {
-            sessionStorage.setItem('launchSeen', 'true');
-            console.log('Redirecting to Launch Page...');
-            window.location.href = 'launch.html';
-            return; // Stop further initialization if redirecting
-        }
         this.loadDashboard();
     },
 

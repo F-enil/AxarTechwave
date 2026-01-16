@@ -17,6 +17,193 @@
     <meta property="og:image" content="https://www.axartechwave.com/og-image.jpg">
     <meta property="og:url" content="https://www.axartechwave.com">
 
+    <!-- Launch Page Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Launch Overlay Styles */
+        #launch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 99999;
+            background: transparent;
+            /* Allows transparency when curtains open */
+            overflow: hidden;
+            display: none;
+            /* Hidden by default, toggled via JS */
+        }
+
+        #launch-overlay.active {
+            display: block;
+        }
+
+        /* Curtains */
+        .curtain-panel {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-image: url('images/launch_curtain.jpg');
+            background-size: 200% 100%;
+            /* Stretch width to double */
+            background-repeat: no-repeat;
+            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .curtain-left {
+            left: 0;
+            background-position: left center;
+            transform-origin: left;
+        }
+
+        .curtain-right {
+            right: 0;
+            background-position: right center;
+            /* Show right half */
+            transform-origin: right;
+        }
+
+        .curtain-left.open {
+            transform: translateX(-100%);
+        }
+
+        .curtain-right.open {
+            transform: translateX(100%);
+        }
+
+        /* Content On Top of Curtains */
+        .launch-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+            /* Above curtains */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Rasa', serif;
+            transition: opacity 1s ease;
+            pointer-events: none;
+            /* Let clicks pass to ribbon if needed */
+        }
+
+        .launch-content.fade-out {
+            opacity: 0;
+        }
+
+        .god-header {
+            position: absolute;
+            top: 5%;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            color: #5a3e1b;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+        }
+
+        .launch-logo-circle {
+            width: 15rem;
+            height: 15rem;
+            background: white;
+            border-radius: 50%;
+            padding: 1rem;
+            box-shadow: 0 0 30px rgba(218, 165, 32, 0.6);
+            border: 4px solid #daa520;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .launch-logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .launch-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #daa520;
+            padding: 2rem 4rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .launch-card .btn-hint {
+            background: #555;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 0.3rem;
+            font-size: 0.9rem;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            /* User asked to hide guide */
+        }
+
+        .launch-card h2 {
+            color: #e74c3c;
+            font-size: 2.2rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .launch-card p {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin: 0.5rem 0;
+        }
+
+        /* Ribbon */
+        #launch-ribbon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 60vh;
+            /* Adjust height to match image aspect */
+            z-index: 40;
+            cursor: pointer;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            pointer-events: auto;
+        }
+
+        #launch-ribbon.cut {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+
     <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700&display=swap"
@@ -362,7 +549,40 @@
     </style>
 </head>
 
-<body class="font-body bg-white overflow-x-hidden">
+<body class="font-body text-gray-800 bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- GRAND LAUNCH OVERLAY -->
+    <div id="launch-overlay">
+        <!-- Curtains -->
+        <div class="curtain-panel curtain-left" id="curtain-left"></div>
+        <div class="curtain-panel curtain-right" id="curtain-right"></div>
+
+        <!-- Ribbon -->
+        <img src="images/launch_ribbon.jpg" id="launch-ribbon" alt="Ribbon">
+
+        <!-- Overlay Text Content -->
+        <div class="launch-content" id="launch-content">
+            <div class="god-header">
+                <span>|| જય શ્રી સ્વામિનારાયણ ||</span>
+                <span>|| શ્રી ગણેશાય નમ: ||</span>
+                <span>|| જય શ્રી ઉમિયા માતાજી ||</span>
+            </div>
+
+            <div class="launch-logo-circle">
+                <img src="images/launch_logo.png" alt="Axar TechWave">
+            </div>
+
+            <div class="launch-card">
+                <!-- <div class="btn-hint">Press ENTER to Launch</div> -->
+                <h2>તારીખ :- 23-01-2026</h2>
+                <p style="color: #004080;">વસંત પંચમી</p>
+                <p>વિક્રમ સંવત: 2082</p>
+                <p>વાર :- શનિવાર</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
     <!-- Top Bar -->
     <div class="bg-primary text-white py-2 text-sm">
         <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
@@ -1953,6 +2173,89 @@
             </form>
         </div>
     </div>
+    <!-- Launch Logic Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('launch-overlay');
+            const ribbon = document.getElementById('launch-ribbon');
+            const curtainLeft = document.getElementById('curtain-left');
+            const curtainRight = document.getElementById('curtain-right');
+            const content = document.getElementById('launch-content');
+
+            // Check if already launched in this session
+            const hasLaunched = sessionStorage.getItem('launch_completed');
+
+            // Debug override/Force show specific param ?launch=true
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceLaunch = urlParams.get('launch') === 'true';
+
+            if (!hasLaunched || forceLaunch) {
+                // Show Overlay
+                overlay.classList.add('active');
+
+                let isLaunching = false;
+
+                const startLaunch = () => {
+                    if (isLaunching) return;
+                    isLaunching = true;
+
+                    // 1. Confetti (Continuous)
+                    const duration = 5000;
+                    const end = Date.now() + duration;
+
+                    (function frame() {
+                        confetti({
+                            particleCount: 5,
+                            angle: 60,
+                            spread: 55,
+                            origin: { x: 0 },
+                            colors: ['#ff0000', '#daa520', '#ffffff'] // Red, Gold, White
+                        });
+                        confetti({
+                            particleCount: 5,
+                            angle: 120,
+                            spread: 55,
+                            origin: { x: 1 },
+                            colors: ['#ff0000', '#daa520', '#ffffff']
+                        });
+
+                        if (Date.now() < end) {
+                            requestAnimationFrame(frame);
+                        }
+                    }());
+
+                    // 2. Animate Ribbon (Cut/Fade)
+                    ribbon.classList.add('cut');
+
+                    // 3. Fade out text
+                    content.classList.add('fade-out');
+
+                    // 4. Open Curtains (Delayed slightly for effect)
+                    setTimeout(() => {
+                        curtainLeft.classList.add('open');
+                        curtainRight.classList.add('open');
+                    }, 500);
+
+                    // 5. Cleanup (Remove overlay allow interaction with site below)
+                    setTimeout(() => {
+                        overlay.style.pointerEvents = 'none'; // Passthrough immediately once open
+                        sessionStorage.setItem('launch_completed', 'true');
+                    }, 3500); // 3s curtain animation + buffer
+
+                    setTimeout(() => {
+                        overlay.style.display = 'none'; // Fully hide
+                    }, 4000);
+                };
+
+                // Triggers: Enter Key or Click on Ribbon
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') startLaunch();
+                });
+
+                ribbon.addEventListener('click', startLaunch);
+            }
+        });
+    </script>
 </body>
 
 </html>
