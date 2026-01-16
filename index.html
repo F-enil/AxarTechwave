@@ -118,122 +118,132 @@
             pointer-events: none;
         }
 
-        /* GOD HEADER - GOLDEN TEXT */
+        /* GOD HEADER - BRIGHT GOLD & LEGIBLE */
         .god-header {
             position: absolute;
-            top: 8%;
+            top: 5%;
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 3rem;
             flex-wrap: wrap;
             padding: 0 1rem;
+            z-index: 50;
+            /* Ensure on top */
 
             font-family: 'Rasa', serif;
             font-weight: 700;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             letter-spacing: 1px;
 
-            /* Gold Gradient Text */
-            background: linear-gradient(to bottom, #cfc09f 22%, #634f2c 24%, #cfc09f 26%, #cfc09f 27%, #ffecb3 40%, #3a2c0f 78%);
+            /* Bright Gold Gradient */
+            background: linear-gradient(to bottom, #FFD700 0%, #FDB931 50%, #FFD700 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
-            filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+            /* solid fallback */
+            color: #FFD700;
+
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
         }
 
-        /* PREMIUM GLASS CARD */
+        /* PREMIUM WHITE CARD (High Contrast) */
         .launch-card {
-            background: rgba(255, 255, 255, 0.1);
-            /* Frosted Glass */
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            /* Opaque White */
+            border: 4px solid #daa520;
+            /* Solid Gold Border */
 
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.5);
-            border-left: 1px solid rgba(255, 255, 255, 0.5);
-
-            padding: 3rem 5rem;
+            padding: 3rem 4rem;
             border-radius: 20px;
             text-align: center;
             position: relative;
+            min-width: 320px;
+            max-width: 90%;
 
-            /* Gold Border Glow */
             box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(218, 165, 32, 0.5),
-                /* Inner gold ring */
-                0 0 30px rgba(218, 165, 32, 0.2);
-            /* Outer gold glow */
+                0 25px 50px rgba(0, 0, 0, 0.7),
+                /* Deep shadow */
+                0 0 0 2px #fff inset;
+            /* Inner white ring */
 
             transform-style: preserve-3d;
             animation: float-card 6s ease-in-out infinite;
         }
 
         .launch-logo-circle {
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 2rem auto;
-            background: radial-gradient(circle, #fff 60%, #f0f0f0 100%);
+            width: 160px;
+            height: 160px;
+            margin: -6rem auto 2rem auto;
+            /* Overlap top of card */
+            background: white;
             border-radius: 50%;
-            padding: 15px;
-            border: 4px solid #daa520;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border: 6px solid #daa520;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 10;
+            position: relative;
         }
 
         .launch-logo-circle img {
-            width: 90%;
-            height: 90%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
+            display: block;
+            /* Remove inline spacing */
         }
 
+        /* CARD TYPOGRAPHY */
         .launch-card h2 {
             font-family: 'Rasa', serif;
-            color: #fff;
+            color: #b91c1c;
+            /* Deep Red Text */
             font-size: 3rem;
             margin: 0;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            /* Fallback */
-            color: #ff4d4d;
+            font-weight: 800;
+            text-shadow: none;
+            /* Clean Look */
+            line-height: 1.2;
         }
 
         .launch-card p {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem;
-            color: #eaeaea;
-            font-weight: 500;
+            font-size: 1.3rem;
+            color: #333;
+            /* Dark Grey for readability */
+            font-weight: 600;
             margin: 0.5rem 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .highlight-gold {
-            color: #f1c40f;
-            font-weight: 700;
+            color: #b45309;
+            /* Dark Gold/Bronze for contrast on white */
+            font-weight: 800;
+            font-size: 1.5rem;
+            display: block;
+            margin: 10px 0;
         }
 
-        /* RIBBON PHYSICS */
+        /* RIBBON - CENTER & BIG */
         #launch-ribbon {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            /* Ensure it spans */
-            max-width: 800px;
+            width: 100vw;
+            /* Full width */
+            max-width: 900px;
+            /* Max cap */
             height: auto;
-            z-index: 40;
+            z-index: 60;
+            /* Topmost */
             cursor: pointer;
-            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+            opacity: 1;
+            /* Force visible */
             transition: all 0.5s ease;
         }
 
