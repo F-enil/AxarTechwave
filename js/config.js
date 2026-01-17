@@ -6,6 +6,6 @@ const CONFIG = {
     MEDIA_URL: 'https://axartechwave.onrender.com/uploads', // Adjust if using cloudbucket
 
     // Payment Gateway
-    RAZORPAY_KEY:'rzp_test_RygKV0wepSF5SR', // REPLACE WITH YOUR ACTUAL KEY
-    RAZORPAY_KEY_SECRET:'74jkkmI9ct2dCw2AShJArR69'
+    RAZORPAY_KEY: 'rzp_test_RygKV0wepSF5SR', // Public Key ID only
+    // Secret Key removed for security. It must be in Backend .env
 };
