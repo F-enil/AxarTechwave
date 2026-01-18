@@ -1354,21 +1354,13 @@ const UI = {
         const email = inputs[0].value;
         const password = inputs[1].value;
 
+        console.log('[UI] Manual Login Submitted');
+
         if (await Auth.login(email, password)) {
-            this.showToast('Logged in successfully!', 'success');
-            document.getElementById('login-modal').classList.remove('show');
-
-            const user = Auth.getUser();
-            if (user && (user.role === 'admin' || user.role === 'staff')) {
-                setTimeout(() => window.location.href = 'admin.html', 1000);
-                return;
-            }
-
-            this.checkAuth();
-            this.loadOrderHistory(); // Load user data
-            this.loadAddressBook();
-            this.updateCartCount();
+            console.log('[UI] Auth.login returned true. Triggering Success Flow...');
+            await this.onLoginSuccess();
         } else {
+            console.warn('[UI] Auth.login returned false');
             this.showToast('Login failed. Check credentials.', 'error');
         }
     },
