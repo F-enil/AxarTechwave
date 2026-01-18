@@ -54,7 +54,6 @@ const Auth = {
             try {
                 localStorage.setItem('access_token', token);
 
-                // Decode using Base64
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const user = {
                     id: payload.sub,
@@ -63,14 +62,39 @@ const Auth = {
                 };
                 localStorage.setItem('user', JSON.stringify(user));
 
-                // Redirect to Clean URL (This triggers a reload)
-                // This is safer than replaceState because it forces UI (Cart/Wishlist) to re-init
-                window.location.href = window.location.pathname;
+                // 1. Clean URL (No Reload) to prevent loops
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                // 2. Trigger UI Updates Logic
+                // We use a small timeout to ensure UI/Cart logic is ready
+                setTimeout(async () => {
+                    // Update Header User Icon
+                    if (window.UI && UI.checkAuth) UI.checkAuth();
+
+                    // Update Cart Badge
+                    if (window.Cart) {
+                        try {
+                            const cart = await Cart.getCart();
+                            const count = cart ? cart.items.length : 0;
+                            const badge = document.getElementById('cart-count');
+                            if (badge) badge.innerText = count;
+                            // Also update cart display if we are on cart page
+                            if (window.UI && UI.updateCartDisplay) UI.updateCartDisplay();
+                        } catch (err) {
+                            console.error('Cart update failed', err);
+                        }
+                    }
+
+                    // Show Success Message
+                    if (window.UI && UI.showToast) {
+                        UI.showToast('Login Successful!', 'success');
+                    }
+                }, 100);
 
             } catch (e) {
                 console.error('Error processing google token', e);
                 localStorage.removeItem('access_token');
-                window.location.href = window.location.pathname;
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
     }
