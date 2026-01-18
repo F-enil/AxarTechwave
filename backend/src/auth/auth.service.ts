@@ -80,8 +80,22 @@ export class AuthService {
         const user = await this.prisma.user.findUnique({ where: { email: details.email } });
 
         if (user) {
-            // Update user if needed (e.g. store google ID if not present)
-            // For now, just return
+            // Update user if needed (Sync Google Name - Always Prefer Google Name for Consistency)
+            const googleName = (details.firstName || details.lastName)
+                ? `${details.firstName || ''} ${details.lastName || ''}`.trim()
+                : null;
+
+            if (googleName && user.username !== googleName) {
+                return await this.prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        username: googleName,
+                        provider: details.provider,
+                        providerId: details.providerId
+                    }
+                });
+            }
+
             return user;
         }
 

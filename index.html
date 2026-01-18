@@ -2163,50 +2163,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="js/admin.js?v=3.1"></script>
     <script>
-        // Inline overrides removed. Using main UI.js logic.
-
-        // Add toggleFilters function for mobile sidebar
-        // Add toggleFilters function for mobile sidebar - Explicitly attached to window
-        window.toggleFilters = function () {
-            console.log('toggleFilters called');
-            const sidebar = document.querySelector('.filter-sidebar');
-            if (sidebar) {
-                console.log('Sidebar found, toggling open class');
-                sidebar.classList.toggle('open');
-            } else {
-                console.error('Sidebar element .filter-sidebar not found!');
-            }
-        };
-
-
-
-
-
-
-
-
-
-
-    </script>
-    <script>
-        // Hook into showPage to render checkout
-        const originalShowPage = window.showPage;
-        window.showPage = function (pageId) {
-            if (typeof originalShowPage === 'function') originalShowPage(pageId);
-
-            // Handle section visibility (legacy script might use display:none)
-            // But we also need to ensure we hide/show the right things if the original script didn't handle 'checkout' specifically
-            // The HTML has a #checkout-page div.
-
-            if (pageId === 'checkout') {
-                if (window.renderCheckout) window.renderCheckout();
-            }
-        };
-
-        // Ensure addToCart is overridden after load
-        window.addEventListener('load', () => {
-            if (UI && UI.setupGlobalHandlers) UI.setupGlobalHandlers();
-        });
+        // Inline overrides removed. Using centralized UI.js logic.
     </script>
 
     <!-- Return Modal -->

@@ -1416,16 +1416,16 @@ const UI = {
 
     // Centralized Login Success Handler (No-Reload)
     async onLoginSuccess() {
-        console.log('[UI] onLoginSuccess triggered');
+
 
         // 1. Update Header Button immediately
-        console.log('[UI] Calling checkAuth...');
+
         this.checkAuth();
 
         // 2. Refresh Cart contents (merge/load)
         if (window.Cart) {
             try {
-                console.log('[UI] Refreshing Cart...');
+
                 // Cart.getCart() ensures fresh data; updateCartDisplay updates UI
                 await Cart.getCart();
                 this.updateCartDisplay();
