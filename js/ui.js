@@ -151,7 +151,10 @@ const UI = {
 
     init() {
         this.setupAuthObserver();
-        this.loadCart();
+        this.setupAuthObserver();
+        // this.loadCart(); // Does not exist
+        if (window.Cart) this.updateCartDisplay(); // Use existing method
+        this.setupGlobalHandlers();
         this.setupGlobalHandlers();
         this.setupMaintenanceCheck(); // <--- Start polling
 
@@ -1414,9 +1417,11 @@ const UI = {
         this.checkAuth();
 
         // 2. Refresh Cart contents (merge/load)
+        // 2. Refresh Cart contents (merge/load)
         if (window.Cart) {
             try {
-                await this.loadCart();
+                // Cart.getCart() ensures fresh data; updateCartDisplay updates UI
+                await Cart.getCart();
                 this.updateCartDisplay();
             } catch (e) { console.error('Cart refresh error', e); }
         }

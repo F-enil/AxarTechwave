@@ -202,6 +202,7 @@ const Admin = {
 
     showLoginForm() {
         const app = document.getElementById('admin-app');
+        if (!app) return; // FIX: Don't run on non-admin pages
         app.innerHTML = `
             <div class="min-h-screen flex items-center justify-center bg-gray-100 font-body">
                 <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
