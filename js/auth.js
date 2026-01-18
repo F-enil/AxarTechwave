@@ -93,6 +93,9 @@ const Auth = {
 
             } catch (e) {
                 console.error('Error processing google token', e);
+                // DEBUG: Tell user why it failed
+                alert('Login Failed: ' + e.message);
+
                 localStorage.removeItem('access_token');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
