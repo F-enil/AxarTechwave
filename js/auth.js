@@ -62,55 +62,54 @@ const Auth = {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         if (token) {
-            console.log('Google Auth Token detected');
+            console.log('[Auth] Google Auth Token detected');
             try {
                 localStorage.setItem('access_token', token);
 
-                const payload = JSON.parse(atob(token.split('.')[1]));
+                const parts = token.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                console.log('[Auth] Token Payload:', payload);
+
+                // Use payload username or fallback to email part
                 const user = {
                     id: payload.sub,
                     email: payload.email,
-                    role: payload.role || 'customer'
+                    role: payload.role || 'customer',
+                    username: payload.username || payload.name || payload.email.split('@')[0]
                 };
+
                 localStorage.setItem('user', JSON.stringify(user));
+                console.log('[Auth] User saved to localStorage');
 
                 // 1. Clean URL (No Reload) to prevent loops
                 window.history.replaceState({}, document.title, window.location.pathname);
 
-                // 2. Trigger UI Updates Logic
-                // We use a small timeout to ensure UI/Cart logic is ready
-                setTimeout(async () => {
-                    // Update Header User Icon
+                // 2. Trigger UI Update (No Reload)
+                if (window.UI && UI.onLoginSuccess) {
+                    console.log('[Auth] Calling UI.onLoginSuccess()...');
+                    UI.onLoginSuccess();
+                } else {
+                    console.warn('[Auth] UI.onLoginSuccess not found!');
+                    // Fallback just in case
                     if (window.UI && UI.checkAuth) UI.checkAuth();
-
-                    // Update Cart Badge
-                    if (window.Cart) {
-                        try {
-                            const cart = await Cart.getCart();
-                            const count = cart ? cart.items.length : 0;
-                            const badge = document.getElementById('cart-count');
-                            if (badge) badge.innerText = count;
-                            // Also update cart display if we are on cart page
-                            if (window.UI && UI.updateCartDisplay) UI.updateCartDisplay();
-                        } catch (err) {
-                            console.error('Cart update failed', err);
-                        }
-                    }
-
-                    // Show Success Message
-                    if (window.UI && UI.showToast) {
-                        UI.showToast('Login Successful!', 'success');
-                    }
-                }, 100);
+                }
 
             } catch (e) {
-                console.error('Error processing google token', e);
-                // DEBUG: Tell user why it failed
-                alert('Login Failed: ' + e.message);
-
+                console.error('[Auth] Error processing google token', e);
                 localStorage.removeItem('access_token');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
+        }
+    }
+
+} catch (e) {
+    console.error('Error processing google token', e);
+    // DEBUG: Tell user why it failed
+    alert('Login Failed: ' + e.message);
+
+    localStorage.removeItem('access_token');
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
         }
     }
 };
