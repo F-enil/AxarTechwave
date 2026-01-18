@@ -54,7 +54,7 @@ const Auth = {
             try {
                 localStorage.setItem('access_token', token);
 
-                // Decode token and save user
+                // Decode using Base64
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const user = {
                     id: payload.sub,
@@ -62,31 +62,15 @@ const Auth = {
                     role: payload.role || 'customer'
                 };
                 localStorage.setItem('user', JSON.stringify(user));
-                console.log('User saved:', user);
 
-                // 1. Clean URL WITHOUT Reloading
-                window.history.replaceState({}, document.title, window.location.pathname);
-
-                // 2. Update UI Immediately (Header, Buttons)
-                if (typeof UI !== 'undefined' && UI.checkAuth) {
-                    UI.checkAuth();
-                }
-
-                // 3. Show Success Toast
-                if (typeof UI !== 'undefined' && UI.showToast) {
-                    UI.showToast('Successfully logged in with Google!', 'success');
-                }
-
-                // Optional: Dispatch event for other listeners
-                window.dispatchEvent(new Event('auth-change'));
+                // Redirect to Clean URL (This triggers a reload)
+                // This is safer than replaceState because it forces UI (Cart/Wishlist) to re-init
+                window.location.href = window.location.pathname;
 
             } catch (e) {
                 console.error('Error processing google token', e);
-                if (typeof UI !== 'undefined' && UI.showToast) {
-                    UI.showToast('Google Login Failed: Invalid Token', 'error');
-                }
-                // Clean URL even on error
-                window.history.replaceState({}, document.title, window.location.pathname);
+                localStorage.removeItem('access_token');
+                window.location.href = window.location.pathname;
             }
         }
     }
