@@ -1,18 +1,28 @@
 const Auth = {
     async login(email, password) {
+        console.log('[Auth] Attempting login for:', email);
         try {
             const response = await API.post('/auth/login', { email, password });
+            console.log('[Auth] Login API Response:', response);
+
             if (response.access_token) {
+                console.log('[Auth] Token received. Saving...');
                 localStorage.setItem('access_token', response.access_token);
-                // Decode token to get user info (simplified)
-                // Decode token to get user info (simplified)
-                const payload = JSON.parse(atob(response.access_token.split('.')[1]));
+
+                const parts = response.access_token.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                console.log('[Auth] Token Payload:', payload);
+
                 localStorage.setItem('user', JSON.stringify(payload));
+                console.log('[Auth] User saved to localStorage');
 
                 return true;
+            } else {
+                console.warn('[Auth] No access_token in response');
             }
             return false;
         } catch (error) {
+            console.error('[Auth] Login Error:', error);
             if (typeof UI !== 'undefined' && UI.showToast) UI.showToast(error.message, 'error');
             else alert(error.message);
             return false;
