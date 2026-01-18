@@ -1367,13 +1367,13 @@ const UI = {
         const email = inputs[0].value;
         const password = inputs[1].value;
 
-        console.log('[UI] Manual Login Submitted');
+
 
         if (await Auth.login(email, password)) {
-            console.log('[UI] Auth.login returned true. Triggering Success Flow...');
+
             await this.onLoginSuccess();
         } else {
-            console.warn('[UI] Auth.login returned false');
+
             this.showToast('Login failed. Check credentials.', 'error');
         }
     },

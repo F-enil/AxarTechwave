@@ -312,6 +312,11 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Suppress Tailwind CDN production warning
+        tailwind.config = { theme: { extend: {} } };
+        console.warn = (function (fn) { return function (msg) { if (msg.includes('tailwindcss')) return; return fn.apply(console, arguments); } })(console.warn);
+    </script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
