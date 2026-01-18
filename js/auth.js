@@ -87,7 +87,11 @@ const Auth = {
                 // 2. Trigger UI Update (No Reload)
                 if (window.UI && UI.onLoginSuccess) {
                     console.log('[Auth] Calling UI.onLoginSuccess()...');
-                    UI.onLoginSuccess();
+                    try {
+                        UI.onLoginSuccess();
+                    } catch (uiError) {
+                        console.error('[Auth] UI Update failed, but session is valid.', uiError);
+                    }
                 } else {
                     console.warn('[Auth] UI.onLoginSuccess not found!');
                     // Fallback just in case
