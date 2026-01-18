@@ -1406,6 +1406,64 @@ const UI = {
         });
     },
 
+    // Centralized Login Success Handler (No-Reload)
+    async onLoginSuccess() {
+        // 1. Update Header Button immediately
+        this.checkAuth();
+
+        // 2. Refresh Cart contents (merge/load)
+        if (window.Cart) {
+            await this.loadCart();
+        }
+
+        // 3. Show Success Toast
+        this.showToast('Login Successful!', 'success');
+
+        // 4. Close Modals
+        this.closeLoginModal();
+
+        // 5. If we are on a page that needs auth (like profile), refresh it
+        // Or if we are in checkout, maybe nothing special needed beyond checkAuth
+    },
+
+    // Centralized Login Success Handler (No-Reload)
+    async onLoginSuccess() {
+        console.log('Handling Login Success (No Reload)');
+
+        // 1. Update Header Button immediately
+        this.checkAuth();
+
+        // 2. Refresh Cart contents (merge/load)
+        if (window.Cart) {
+            await this.loadCart();
+        }
+
+        // 3. Show Success Toast
+        this.showToast('Login Successful!', 'success');
+
+        // 4. Close Modals
+        this.closeLoginModal();
+    },
+
+    // Centralized Login Success Handler (No-Reload)
+    async onLoginSuccess() {
+        console.log('Handling Login Success (No Reload)');
+
+        // 1. Update Header Button immediately
+        this.checkAuth();
+
+        // 2. Refresh Cart contents (merge/load)
+        if (window.Cart) {
+            await this.loadCart();
+        }
+
+        // 3. Show Success Toast
+        this.showToast('Login Successful!', 'success');
+
+        // 4. Close Modals
+        this.closeLoginModal();
+    },
+
     checkAuth() {
         const user = Auth.getUser();
 
