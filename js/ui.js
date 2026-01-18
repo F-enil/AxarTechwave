@@ -150,6 +150,11 @@ const UI = {
     },
 
     init() {
+        // DEBUG: Check if session exists on load
+        const user = Auth.getUser();
+        if (user) alert('Persistence Check: Logged in as ' + user.email);
+        else alert('Persistence Check: No User Found (Logged Out)');
+
         this.setupAuthObserver();
         this.loadCart();
         this.setupGlobalHandlers();
