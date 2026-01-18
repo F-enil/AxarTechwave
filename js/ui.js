@@ -118,45 +118,58 @@ const UI = {
         }
     },
 
-    // --- Maintenance Mode Auto-Redirect (Added) ---
-    setupMaintenanceCheck() {
-        const checkMaintenance = async () => {
+    // --- Site Status & Auto-Update Check ---
+    setupSiteStatusCheck() {
+        const checkStatus = async () => {
+            // 1. Check Maintenance Mode
             try {
-                // Determine API URL safely (handle production relative path if needed, or use CONFIG)
-                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)
-                    ? CONFIG.API_URL
-                    : '/api';
-
-                const res = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`);
-                if (res.ok) {
-                    const settings = await res.json();
+                const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : '/api';
+                const cmsRes = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`);
+                if (cmsRes.ok) {
+                    const settings = await cmsRes.json();
                     if (settings.maintenanceMode === true) {
-                        // If we are NOT already on maintenance page, redirect
                         if (!window.location.pathname.includes('maintenance.html')) {
                             console.log('Maintenance mode enabled. Redirecting...');
                             window.location.href = 'maintenance.html';
                         }
                     }
                 }
-            } catch (e) {
-                // silent fail on network error, don't disrupt user
-            }
+            } catch (e) { /* Silent fail */ }
+
+            // 2. Check for App Updates (Force Reload)
+            try {
+                const verRes = await fetch(`/version.json?t=${new Date().getTime()}`);
+                if (verRes.ok) {
+                    const data = await verRes.json();
+                    const serverVer = data.version;
+                    const localVer = localStorage.getItem('app_version');
+
+                    if (localVer && localVer !== serverVer) {
+                        console.log(`New version detected (${serverVer}). Updating...`);
+                        localStorage.setItem('app_version', serverVer);
+                        // Force clean reload
+                        window.location.reload(true);
+                    } else if (!localVer) {
+                        // First load, set version
+                        localStorage.setItem('app_version', serverVer);
+                    }
+                }
+            } catch (e) { /* Silent fail */ }
         };
 
-        // Check every 3 seconds for faster response
-        setInterval(checkMaintenance, 3000);
+        // Check every 10 seconds (aggressive enough but saves bandwidth)
+        setInterval(checkStatus, 10000);
         // Also check once on load
-        checkMaintenance();
+        checkStatus();
     },
 
     init() {
         this.setupAuthObserver();
-        this.setupAuthObserver();
-        // this.loadCart(); // Does not exist
-        if (window.Cart) this.updateCartDisplay(); // Use existing method
+        // this.loadCart(); // Removed
+        if (window.Cart) this.updateCartDisplay();
         this.setupGlobalHandlers();
-        this.setupGlobalHandlers();
-        this.setupMaintenanceCheck(); // <--- Start polling
+        this.setupSiteStatusCheck(); // <--- Combined polling
+
 
         // ... existing init code ...
 
