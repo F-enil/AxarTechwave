@@ -54,7 +54,7 @@ const Auth = {
             try {
                 localStorage.setItem('access_token', token);
 
-                // Decode token to get user info
+                // Decode token and save user
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const user = {
                     id: payload.sub,
@@ -64,16 +64,29 @@ const Auth = {
                 localStorage.setItem('user', JSON.stringify(user));
                 console.log('User saved:', user);
 
-                // Force clean URL redirect to stop loops
-                // Instead of reload(), we assign href to the clean path
-                window.location.href = window.location.pathname;
+                // 1. Clean URL WITHOUT Reloading
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                // 2. Update UI Immediately (Header, Buttons)
+                if (typeof UI !== 'undefined' && UI.checkAuth) {
+                    UI.checkAuth();
+                }
+
+                // 3. Show Success Toast
+                if (typeof UI !== 'undefined' && UI.showToast) {
+                    UI.showToast('Successfully logged in with Google!', 'success');
+                }
+
+                // Optional: Dispatch event for other listeners
+                window.dispatchEvent(new Event('auth-change'));
 
             } catch (e) {
                 console.error('Error processing google token', e);
-                // Remove bad token
-                localStorage.removeItem('access_token');
-                // Clean URL anyway so we don't loop
-                window.location.href = window.location.pathname;
+                if (typeof UI !== 'undefined' && UI.showToast) {
+                    UI.showToast('Google Login Failed: Invalid Token', 'error');
+                }
+                // Clean URL even on error
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
     }
