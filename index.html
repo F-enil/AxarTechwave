@@ -752,7 +752,8 @@
 
                 <!-- Account & Cart -->
                 <div class="flex items-center gap-2 md:gap-4">
-                    <a id="admin-dashboard-btn" href="admin.html"
+                    <a id="admin-dashboard-btn" href="#"
+                        onclick="event.preventDefault(); if(window.Admin) Admin.init();"
                         class="hidden flex flex-col items-center justify-center text-red-600 hover:text-red-800 transition-colors px-2"
                         aria-label="Admin Dashboard" title="Admin Dashboard">
                         <span class="text-xl">⚙️</span>
@@ -2155,11 +2156,11 @@
     <!-- Backend Integration Scripts -->
     <script src="js/config.js?v=3.1"></script>
     <script src="js/api.js?v=3.1"></script>
+    <script src="js/ui.js?v=3.1"></script> <!-- Moved Up -->
     <script src="js/auth.js?v=3.1"></script>
     <script src="js/cart.js?v=3.1"></script>
     <script src="js/checkout.js?v=3.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="js/ui.js?v=3.1"></script>
     <script src="js/admin.js?v=3.1"></script>
     <script>
         // Inline overrides removed. Using main UI.js logic.
@@ -2359,35 +2360,8 @@
             console.log('Ez Launch Ready for Admin');
         });
 
-        // FIX LOGIN MODAL NOT CLOSING
-        window.handleLogin = async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const email = form.querySelector('input[type="email"]').value;
-            const password = form.querySelector('input[type="password"]').value;
-
-            try {
-                if (typeof Auth !== 'undefined' && await Auth.login(email, password)) {
-                    // Success logic
-                    const modal = document.getElementById('login-modal');
-                    if (modal) {
-                        modal.style.display = 'none';
-                        modal.classList.remove('active', 'show'); // Try multiple classes
-                    }
-
-                    // Call UI helper if exists
-                    if (window.UI && UI.closeLoginModal) UI.closeLoginModal();
-
-                    if (window.UI && UI.showToast) UI.showToast('Logged in successfully', 'success');
-
-                    // Reload to update state
-                    setTimeout(() => window.location.reload(), 500);
-                }
-            } catch (err) {
-                console.error('Login error', err);
-                if (window.UI && UI.showToast) UI.showToast('Login failed', 'error');
-            }
-        };
+        // FIX LOGIN MODAL NOT CLOSING - REMOVED (Handled by UI.js)
+    </script>
     </script>
 </body>
 

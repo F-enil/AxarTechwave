@@ -2187,4 +2187,5 @@ const Admin = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => Admin.init());
+// document.addEventListener('DOMContentLoaded', () => Admin.init());
+// Manual Init required via Dashboard Button
