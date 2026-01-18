@@ -50,27 +50,30 @@ const Auth = {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         if (token) {
-            localStorage.setItem('access_token', token);
+            console.log('Google Auth Token detected');
             try {
+                localStorage.setItem('access_token', token);
+
                 // Decode token to get user info
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const user = {
                     id: payload.sub,
                     email: payload.email,
-                    role: payload.role,
-                    // If we had more info in token we could use it, 
-                    // or we could fetch profile here.
-                    // For now, construct basic user obj
+                    role: payload.role || 'customer'
                 };
                 localStorage.setItem('user', JSON.stringify(user));
+                console.log('User saved:', user);
 
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
+                // Force clean URL redirect to stop loops
+                // Instead of reload(), we assign href to the clean path
+                window.location.href = window.location.pathname;
 
-                // Reload or update UI
-                window.location.reload();
             } catch (e) {
                 console.error('Error processing google token', e);
+                // Remove bad token
+                localStorage.removeItem('access_token');
+                // Clean URL anyway so we don't loop
+                window.location.href = window.location.pathname;
             }
         }
     }
