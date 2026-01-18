@@ -7,6 +7,10 @@ const Auth = {
                 // Decode token to get user info (simplified)
                 const payload = JSON.parse(atob(response.access_token.split('.')[1]));
                 localStorage.setItem('user', JSON.stringify(payload));
+
+                // DEBUG
+                alert('Manual Login: Token Saved to Storage!');
+
                 return true;
             }
             return false;
@@ -53,6 +57,7 @@ const Auth = {
             console.log('Google Auth Token detected');
             try {
                 localStorage.setItem('access_token', token);
+                alert('Google Init: Token Saved!'); // DEBUG
 
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const user = {
