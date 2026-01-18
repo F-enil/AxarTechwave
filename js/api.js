@@ -24,9 +24,10 @@ const API = {
 
             if (response.status === 401) {
                 // Token expired or invalid
-                console.warn('Unauthorized access, logging out...');
-                localStorage.removeItem('access_token');
-                window.location.reload();
+                console.warn('Unauthorized access. Session might be invalid.');
+                // DEBUG: DO NOT RELOAD. Just warn.
+                // localStorage.removeItem('access_token');
+                // if (window.UI) UI.showToast('Session Expired. Please Login Again.', 'error');
                 throw new Error('Session expired. Please login again.');
             }
 
