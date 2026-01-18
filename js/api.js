@@ -25,11 +25,9 @@ const API = {
             if (response.status === 401) {
                 // Token expired or invalid
                 console.warn('Unauthorized access, logging out...');
-                alert('Session Error: Server rejected your login (401). Please try again.'); // DEBUG
-                // Stop clearing token for a moment to let user report it
-                // localStorage.removeItem('access_token');
-                // window.location.reload();
-                return; // Return null/undefined instead of throwing to prevent crash loop
+                localStorage.removeItem('access_token');
+                window.location.reload();
+                throw new Error('Session expired. Please login again.');
             }
 
             const data = await response.json();
