@@ -93,7 +93,9 @@ export class AuthService {
         const newUser = await this.prisma.user.create({
             data: {
                 email: details.email,
-                username: `${details.firstName} ${details.lastName}`,
+                username: (details.firstName || details.lastName)
+                    ? `${details.firstName || ''} ${details.lastName || ''}`.trim()
+                    : details.email.split('@')[0],
                 passwordHash,
                 emailVerified: true,
                 provider: details.provider,
