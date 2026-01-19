@@ -216,7 +216,13 @@ const Admin = {
 
     showLoginForm() {
         const app = document.getElementById('admin-app');
-        if (!app) return; // FIX: Don't run on non-admin pages
+        if (!app) return;
+
+        // Ensure Visibility
+        const shopApp = document.getElementById('shop-app');
+        if (shopApp) shopApp.classList.add('hidden');
+        app.classList.remove('hidden');
+
         app.innerHTML = `
             <div class="min-h-screen flex items-center justify-center bg-gray-100 font-body">
                 <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
@@ -236,7 +242,7 @@ const Admin = {
                         </div>
                         <button type="submit" class="w-full bg-primary text-white p-3 rounded-lg font-bold hover:bg-secondary transform hover:scale-[1.02] transition-all shadow-lg">Login</button>
                     </form>
-                    <p class="mt-6 text-center text-sm"><a href="axartechwavedemo.html" class="text-blue-600 hover:text-blue-800 font-medium">← Back to Store</a></p>
+                    <p class="mt-6 text-center text-sm"><a href="#" onclick="Admin.exitAdmin()" class="text-blue-600 hover:text-blue-800 font-medium">← Back to Store</a></p>
                 </div>
             </div>
         `;
@@ -257,8 +263,8 @@ const Admin = {
             if (success) {
                 const user = Auth.getUser();
                 if (user && (user.role === 'admin' || user.role === 'staff')) {
-                    // Redirect to Launch Page for Grand Opening
-                    window.location.href = 'launch.html';
+                    // Success - Reload to trigger proper Init
+                    window.location.reload();
                 } else {
                     Admin.showToast('Access Denied: Not an admin account', 'error');
                     Auth.logout();
