@@ -419,6 +419,52 @@ export class OrdersService {
         });
     }
 
+    async handleWebhookPayment(customIdOrId: string, paymentId: string, amount: number) {
+        // Try to find order by Custom ID first, then ID
+        // Note: Prisma findFirst needed if customId is not unique constraint, 
+        // but it should be unique enough for this logic.
+
+        let order = await this.prisma.order.findFirst({
+            where: { OR: [{ customId: customIdOrId }, { id: Number(customIdOrId) || 0 }] }
+        });
+
+        if (!order) {
+            console.error(`[Webhook] Order Not Found: ${customIdOrId}`);
+            return;
+        }
+
+        if (order.status === 'paid') {
+            console.log(`[Webhook] Order ${order.id} already paid. Skipping.`);
+            return;
+        }
+
+        console.log(`[Webhook] Marking Order ${order.id} as PAID`);
+
+        await this.prisma.$transaction([
+            this.prisma.order.update({
+                where: { id: order.id },
+                data: { status: 'paid' }
+            }),
+            this.prisma.payment.create({
+                data: {
+                    orderId: order.id,
+                    amount: amount / 100, // Razorpay sends paise
+                    currency: 'INR',
+                    provider: 'razorpay_webhook',
+                    transactionId: paymentId,
+                    status: 'success'
+                }
+            })
+        ]);
+
+        // Generate Invoice
+        try {
+            await this.invoiceService.generateInvoice(order.id);
+        } catch (e) {
+            console.error('Failed to auto-generate invoice record:', e);
+        }
+    }
+
     async updateTracking(id: number, trackingId: string, courierCompanyName: string, status?: string) {
         const data: any = {
             trackingId,

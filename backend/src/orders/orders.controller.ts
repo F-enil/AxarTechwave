@@ -1,4 +1,5 @@
-import { Controller, Post, Get, UseGuards, Request, Body, Res, Param, ParseIntPipe, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Request, Body, Res, Param, ParseIntPipe, UnauthorizedException, Headers, BadRequestException } from '@nestjs/common';
+import { Public } from '../common/decorators/public.decorator'; // Assuming you have a public decorator or need to exclude from global guard
 import { Response } from 'express';
 import { OrdersService } from './orders.service';
 import { InvoicesService } from './invoices.service';
@@ -88,5 +89,48 @@ export class OrdersController {
     @Post(':id/tracking')
     updateTracking(@Param('id', ParseIntPipe) id: number, @Body() body: { trackingId: string, courierCompanyName: string, status?: string }) {
         return this.ordersService.updateTracking(id, body.trackingId, body.courierCompanyName, body.status);
+    }
+
+    @Public() // Bypass JWT Auth
+    @Post('webhook')
+    async handleWebhook(@Headers('x-razorpay-signature') signature: string, @Body() body: any) {
+        // 1. Verify Secret Exists
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            console.error('Webhook Secret Missing in Environment');
+            throw new BadRequestException('Server Config Error');
+        }
+
+        // 2. Verify Signature
+        const crypto = require('crypto');
+        const expectedSignature = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(JSON.stringify(body))
+            .digest('hex');
+
+        if (expectedSignature !== signature) {
+            console.error('Invalid Webhook Signature');
+            throw new BadRequestException('Invalid Signature');
+        }
+
+        // 3. Handle Events
+        const event = body.event;
+        console.log(`[Webhook] Received Event: ${event}`);
+
+        if (event === 'payment.captured' || event === 'order.paid') {
+            const payment = body.payload.payment.entity;
+            const orderCustomId = payment.description.replace('Order #', '').trim(); // Extract ID
+
+            // We need to find order by Custom ID or DB ID
+            // Since we stored customId, we might need a lookup method
+            // Or if description is purely the ID
+
+            console.log(`[Webhook] Payment Captured for Order ${orderCustomId}`);
+
+            // Ideally calls a service method to update status by CustomID
+            await this.ordersService.handleWebhookPayment(orderCustomId, payment.id, payment.amount);
+        }
+
+        return { status: 'ok' };
     }
 }
