@@ -1,4 +1,4 @@
-const Admin = {
+window.Admin = {
     // Admin Panel Logic
     updateOrderStatus: async (orderId, status) => {
         try {
