@@ -1402,14 +1402,23 @@ window.Admin = {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (res.ok) {
+            let data;
+            try {
+                data = await res.json();
+            } catch (err) {
+                // If JSON parse fails, use text or status
+                throw new Error(`Server Error (${res.status}): ${res.statusText}`);
+            }
+
+            if (res.ok && data.success) {
                 alert("✅ System Reset Complete! reloading...");
                 window.location.reload();
             } else {
-                throw new Error('Reset failed');
+                throw new Error(data.message || `Reset failed (${res.status})`);
             }
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            alert("Reset Error: " + e.message);
         }
     },
 
