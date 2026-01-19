@@ -158,14 +158,36 @@ const Checkout = {
         const taxEl = document.getElementById('checkout-tax');
 
         if (!container || !cart || !cart.items || cart.items.length === 0) {
-            console.log('Checkout: Cart is empty or not loaded');
-            if (container) container.innerHTML = '<div class="text-center py-8"><p class="text-gray-500 mb-4">Your cart is empty.</p><a href="axartechwavedemo.html" class="bg-primary text-white px-6 py-2 rounded">Shop Now</a></div>';
+            console.log('Checkout: Cart is empty');
+            const html = `
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Your cart is empty</h3>
+                    <p class="text-gray-500 mb-6">Looks like you haven't added any items to the cart yet.</p>
+                    <button onclick="showPage('shop')" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">Start Shopping</button>
+                    
+                    <script>
+                        // Hide Summary/Steps if empty
+                        document.getElementById('checkout-steps')?.classList.add('hidden');
+                        document.getElementById('order-summary')?.classList.add('hidden');
+                    </script>
+                </div>
+            `;
+            if (container) container.innerHTML = html;
 
-            // Explicitly zero out summary to avoid confusion
+            // Zero out summary just in case
             if (subtotalEl) subtotalEl.innerText = '₹0';
             if (totalEl) totalEl.innerText = '₹0';
             const shippingRow = document.getElementById('checkout-shipping');
             if (shippingRow) shippingRow.innerText = '₹0';
+
+            // Hide the wrapper if possible to avoid showing "Shipping > Payment" headers
+            const checkoutWrapper = document.getElementById('checkout-main-grid');
+            if (checkoutWrapper) {
+                checkoutWrapper.innerHTML = html; // Replace entire checkout view with empty state
+            }
 
             return;
         }
@@ -353,8 +375,8 @@ const Checkout = {
                     },
                     "modal": {
                         "ondismiss": function () {
-                            if (window.UI) UI.showToast('Payment Cancelled. Order created as pending.', 'info');
-                            else alert('Payment Cancelled. Order created as pending.');
+                            if (window.UI) UI.showToast('Payment Cancelled. Order will not be processed.', 'info');
+                            else alert('Payment Cancelled. Order will not be processed.');
                             window.location.href = '?page=orders'; // Redirect to Avoid re-adding
                         }
                     }

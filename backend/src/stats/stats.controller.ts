@@ -20,17 +20,26 @@ export class StatsController {
                 recentOrders,
                 ordersWithAddress
             ] = await Promise.all([
-                this.prisma.user.count().catch(e => { console.error('Count users failed', e); return 0; }),
-                this.prisma.order.count().catch(e => { console.error('Count orders failed', e); return 0; }),
+                // Count Users who have at least one NON-CREATED order (Paying Customers)
+                this.prisma.user.count({
+                    where: { orders: { some: { status: { not: 'created' } } } }
+                }).catch(e => { console.error('Count users failed', e); return 0; }),
+
+                // Count Orders that are NOT 'created' (Real Orders)
+                this.prisma.order.count({
+                    where: { status: { not: 'created' } }
+                }).catch(e => { console.error('Count orders failed', e); return 0; }),
+
                 this.prisma.product.count().catch(e => { console.error('Count products failed', e); return 0; }),
                 this.prisma.order.findMany({
                     take: 5,
+                    where: { status: { not: 'created' } }, // Filter Recent Orders too
                     orderBy: { createdAt: 'desc' },
                     include: { user: true }
                 }).catch(e => { console.error('Find recent orders failed', e); return []; }),
                 this.prisma.order.findMany({
                     select: { shippingAddress: true },
-                    where: { status: { not: 'cancelled' } }
+                    where: { status: { notIn: ['cancelled', 'created'] } } // Filter Map Data
                 }).catch(e => { console.error('Orders address failed', e); return []; })
             ]);
 

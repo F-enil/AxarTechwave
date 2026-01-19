@@ -82,19 +82,15 @@ export class OrdersService {
                     // Store tax info per item if needed in future, for now aggregate
                 });
 
-                // C. Auto-Decrement Stock (Create 'Out' Ledger)
-                await tx.inventoryLedger.create({
-                    data: {
-                        variantId: item.variantId,
-                        quantity: item.quantity,
-                        type: 'out',
-                        reference: 'order_payment_pending' // OR 'order_created'
-                    }
-                });
+                // C. Stock Check Only (Deduction deferred to Payment)
+                // Note: We already checked (currentStock < item.quantity) above.
+                // We DO NOT deduct stock here anymore. It happens on payment success.
 
                 // D. Low Stock Notification
-                const newStock = currentStock - item.quantity;
-                this.notificationService.checkStockLevel(item.variantId, item.variant.product.title, newStock);
+                // Check theoretical new stock (just to warn if low), but don't notify yet until sold?
+                // Actually, let's keep notification here or move it? 
+                // Let's keep notification strict: notify only when actually sold.
+                // Removing notification from here.
             }
 
             // Create Order
@@ -142,6 +138,24 @@ export class OrdersService {
                         transactionId: `COD-${customId}`
                     }
                 });
+
+                // For COD, we SHOULD deduct stock immediately because there is no 'payment success' hook later (until delivery).
+                // It's a risk of fake orders, but standard practice.
+                for (const item of cart.items) {
+                    await tx.inventoryLedger.create({
+                        data: {
+                            variantId: item.variantId,
+                            quantity: item.quantity,
+                            type: 'out',
+                            reference: `order_cod_${newOrder.customId}`
+                        }
+                    });
+
+                    // Notify Low Stock
+                    const totalIn = await tx.inventoryLedger.aggregate({ where: { variantId: item.variantId, type: 'in' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
+                    const totalOut = await tx.inventoryLedger.aggregate({ where: { variantId: item.variantId, type: 'out' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
+                    this.notificationService.checkStockLevel(item.variantId, item.variant.product.title, totalIn - totalOut);
+                }
             }
 
             // Clear Cart
@@ -157,7 +171,10 @@ export class OrdersService {
 
     async getOrders(userId: number) {
         const orders: any = await this.prisma.order.findMany({
-            where: { userId },
+            where: {
+                userId,
+                status: { not: 'created' } // Hide ghost orders
+            },
             include: {
                 items: {
                     include: {
@@ -179,6 +196,7 @@ export class OrdersService {
 
     async findAllOrders() {
         const orders: any = await this.prisma.order.findMany({
+            where: { status: { not: 'created' } }, // Hide ghost orders
             include: {
                 items: {
                     include: {
@@ -409,6 +427,31 @@ export class OrdersService {
             console.error('Failed to auto-generate invoice record:', e);
         }
 
+        // Deduct Stock on Payment Success
+        // We need to fetch the order items first
+        const paidOrder = await this.prisma.order.findUnique({
+            where: { id: orderId },
+            include: { items: { include: { variant: { include: { product: true } } } } }
+        });
+
+        if (paidOrder && paidOrder.items) {
+            for (const item of paidOrder.items) {
+                // Deduct Stock
+                await this.prisma.inventoryLedger.create({
+                    data: {
+                        variantId: item.variantId,
+                        quantity: item.quantity,
+                        type: 'out',
+                        reference: `order_paid_${paidOrder.customId}`
+                    }
+                });
+
+                // Check Low Stock
+                // (Optimized: Fire and forget check)
+                this.checkStockAfterDeduction(item.variantId, item.variant?.product?.title || 'Product');
+            }
+        }
+
         return { success: true };
     }
 
@@ -462,6 +505,28 @@ export class OrdersService {
             await this.invoiceService.generateInvoice(order.id);
         } catch (e) {
             console.error('Failed to auto-generate invoice record:', e);
+        }
+
+        // Deduct Stock on Webhook Payment Success
+        if (order && order.id) {
+            const paidOrder = await this.prisma.order.findUnique({
+                where: { id: order.id },
+                include: { items: { include: { variant: { include: { product: true } } } } }
+            });
+
+            if (paidOrder && paidOrder.items) {
+                for (const item of paidOrder.items) {
+                    await this.prisma.inventoryLedger.create({
+                        data: {
+                            variantId: item.variantId,
+                            quantity: item.quantity,
+                            type: 'out',
+                            reference: `order_webhook_${paidOrder.customId}`
+                        }
+                    });
+                    this.checkStockAfterDeduction(item.variantId, item.variant?.product?.title || 'Product');
+                }
+            }
         }
     }
 
@@ -518,5 +583,14 @@ export class OrdersService {
                 });
             }
         });
+    }
+    private async checkStockAfterDeduction(variantId: number, title: string) {
+        try {
+            const totalIn = await this.prisma.inventoryLedger.aggregate({ where: { variantId, type: 'in' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
+            const totalOut = await this.prisma.inventoryLedger.aggregate({ where: { variantId, type: 'out' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
+            this.notificationService.checkStockLevel(variantId, title, totalIn - totalOut);
+        } catch (e) {
+            console.error('Stock check failed', e);
+        }
     }
 }
