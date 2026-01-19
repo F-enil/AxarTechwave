@@ -34,6 +34,7 @@ const Admin = {
         }
     },
     init() {
+        console.log('[Admin] init() TRIGGERED');
         if (!Auth.isLoggedIn()) {
             this.showLoginForm();
             return;
