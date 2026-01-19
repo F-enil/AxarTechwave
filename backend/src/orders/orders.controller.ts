@@ -5,9 +5,10 @@ import { OrdersService } from './orders.service';
 import { InvoicesService } from './invoices.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from '../auth/admin.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('orders')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class OrdersController {
     constructor(
         private readonly ordersService: OrdersService,
