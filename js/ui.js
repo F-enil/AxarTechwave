@@ -1186,7 +1186,9 @@ const UI = {
             const settings = await API.get('/cms/settings');
 
             // Maintenance Mode Check
-            if (settings.maintenanceMode === true) {
+            // EMERGENCY UNLOCK: Force False so Admin can login
+            // if (settings.maintenanceMode === true) { 
+            if (false) {
                 const user = Auth.getUser();
                 const isAdmin = user && (user.role === 'admin' || user.role === 'staff');
 
