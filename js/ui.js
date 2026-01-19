@@ -1190,8 +1190,8 @@ const UI = {
                 const user = Auth.getUser();
                 const isAdmin = user && (user.role === 'admin' || user.role === 'staff');
 
-                // If not admin and not already on maintenance page
-                if (!isAdmin && !window.location.href.includes('maintenance.html')) {
+                // If not admin and not already on maintenance page OR admin page
+                if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html')) {
                     // Use replace to avoid history stack issues
                     window.location.replace('maintenance.html');
                     return; // Stop further execution
