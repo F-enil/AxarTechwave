@@ -40,14 +40,24 @@ const Admin = {
         }
         const user = Auth.getUser();
         if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
-            // Safety logout to prevent loop/crash
             Auth.logout();
             this.showLoginForm();
             return;
         }
         this.user = user;
+        
+        // 1. Toggle Layout
+        document.getElementById('shop-app').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+
+        // 2. Render & Load
         this.renderLayout(user);
         this.loadDashboard();
+    },
+
+    exitAdmin() {
+        // Simple reload to return to shop state clean
+        window.location.reload();
     },
 
     currentView: 'dashboard',
