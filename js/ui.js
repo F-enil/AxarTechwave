@@ -127,7 +127,9 @@ const UI = {
                 const cmsRes = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`);
                 if (cmsRes.ok) {
                     const settings = await cmsRes.json();
-                    if (settings.maintenanceMode === true) {
+                    // EMERGENCY UNLOCK 2
+                    // if (settings.maintenanceMode === true) {
+                    if (false) {
                         if (!window.location.pathname.includes('maintenance.html')) {
                             console.log('Maintenance mode enabled. Redirecting...');
                             window.location.href = 'maintenance.html';
