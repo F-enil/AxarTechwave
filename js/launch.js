@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if conflicting keys are pressed, but main trigger is Enter
     document.addEventListener('keydown', (e) => {
+        console.log('[Launch] Keydown detected:', e.key);
         if (e.key === 'Enter' && !isLaunched) {
+            console.log('[Launch] Enter pressed. Launching...');
             launchWebsite();
         }
     });
