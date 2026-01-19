@@ -45,7 +45,7 @@ const Admin = {
             return;
         }
         this.user = user;
-        
+
         // 1. Toggle Layout
         document.getElementById('shop-app').classList.add('hidden');
         document.getElementById('admin-app').classList.remove('hidden');
@@ -125,6 +125,9 @@ const Admin = {
 
                     <!-- User Footer -->
                     <div class="p-4 bg-black bg-opacity-30 border-t border-gray-700">
+                        <button onclick="Admin.exitAdmin()" class="w-full mb-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium rounded-lg transition-colors flex items-center justify-center space-x-2">
+                             <span>⬅️</span> <span>Back to Shop</span>
+                        </button>
                         <div class="flex items-center space-x-3 mb-4 px-2">
                             <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white border-opacity-20">
                                 ${(user.username || 'Admin').charAt(0).toUpperCase()}
