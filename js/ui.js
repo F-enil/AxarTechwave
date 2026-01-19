@@ -127,10 +127,13 @@ const UI = {
                 const cmsRes = await fetch(`${apiUrl}/cms/settings?t=${new Date().getTime()}`);
                 if (cmsRes.ok) {
                     const settings = await cmsRes.json();
-                    // EMERGENCY UNLOCK 2
-                    // if (settings.maintenanceMode === true) {
-                    if (false) {
-                        if (!window.location.pathname.includes('maintenance.html')) {
+                    if (settings.maintenanceMode === true) {
+                        const user = Auth.getUser();
+                        const role = user && user.role ? user.role.toLowerCase() : '';
+                        const isAdmin = user && (role === 'admin' || role === 'staff');
+
+                        // If NOT admin AND NOT on maintenance/admin page -> Redirect
+                        if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html')) {
                             console.log('Maintenance mode enabled. Redirecting...');
                             window.location.href = 'maintenance.html';
                         }
@@ -1188,11 +1191,10 @@ const UI = {
             const settings = await API.get('/cms/settings');
 
             // Maintenance Mode Check
-            // EMERGENCY UNLOCK: Force False so Admin can login
-            // if (settings.maintenanceMode === true) { 
-            if (false) {
+            if (settings.maintenanceMode === true) {
                 const user = Auth.getUser();
-                const isAdmin = user && (user.role === 'admin' || user.role === 'staff');
+                const role = user && user.role ? user.role.toLowerCase() : '';
+                const isAdmin = user && (role === 'admin' || role === 'staff');
 
                 // If not admin and not already on maintenance page OR admin page
                 if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html')) {

@@ -38,7 +38,10 @@ export class StatsController {
             try {
                 const revenueResult = await this.prisma.order.aggregate({
                     _sum: { total: true },
-                    where: { status: { not: 'cancelled' } }
+                    // Only count actual sales (Paid/Packed/Shipped/Delivered/Returned? maybe not returned)
+                    where: {
+                        status: { in: ['paid', 'packed', 'shipped', 'delivered'] }
+                    }
                 });
                 if (revenueResult._sum.total) {
                     totalRevenue = Number(revenueResult._sum.total);
