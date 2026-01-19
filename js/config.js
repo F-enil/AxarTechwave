@@ -1,4 +1,4 @@
-const CONFIG = {
+window.CONFIG = {
     // PRODUCTION (Render)
     API_URL: 'https://axartechwave.onrender.com/api',
 

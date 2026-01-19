@@ -157,8 +157,16 @@ const Checkout = {
         const totalEl = document.getElementById('checkout-total');
         const taxEl = document.getElementById('checkout-tax');
 
-        if (!container || !cart || cart.items.length === 0) {
-            if (container) container.innerHTML = '<p>Your cart is empty.</p>';
+        if (!container || !cart || !cart.items || cart.items.length === 0) {
+            console.log('Checkout: Cart is empty or not loaded');
+            if (container) container.innerHTML = '<div class="text-center py-8"><p class="text-gray-500 mb-4">Your cart is empty.</p><a href="axartechwavedemo.html" class="bg-primary text-white px-6 py-2 rounded">Shop Now</a></div>';
+
+            // Explicitly zero out summary to avoid confusion
+            if (subtotalEl) subtotalEl.innerText = '₹0';
+            if (totalEl) totalEl.innerText = '₹0';
+            const shippingRow = document.getElementById('checkout-shipping');
+            if (shippingRow) shippingRow.innerText = '₹0';
+
             return;
         }
 

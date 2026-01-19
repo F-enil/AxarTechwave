@@ -1361,10 +1361,55 @@ window.Admin = {
                             <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">Save Configuration</button>
                         </form>
                     </div>
+
+                    <!-- Danger Zone -->
+                    <div class="bg-red-50 p-6 rounded shadow h-fit col-span-1 md:col-span-2 border border-red-200">
+                        <h3 class="text-lg font-bold mb-4 text-red-700">Danger Zone</h3>
+                        <div class="flex items-center justify-between">
+                             <div>
+                                 <h4 class="font-bold text-gray-800">Factory Reset Database</h4>
+                                 <p class="text-xs text-gray-700 max-w-md mt-1">
+                                    This action will permanently delete:
+                                    <ul class="list-disc ml-5 mt-1 text-xs text-red-800">
+                                        <li>All Product Data & Images</li>
+                                        <li>All User Accounts & Credentials (except Admins)</li>
+                                        <li>All Orders, Invoices, and Payments</li>
+                                    </ul>
+                                 </p>
+                             </div>
+                             <button onclick="Admin.handleFactoryReset()" class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-bold shadow transition-colors">
+                                 🚨 RESET EVERYTHING
+                             </button>
+                        </div>
+                    </div>
                 </div>
             `;
         } catch (e) {
             content.innerHTML = `<p class="text-red-500">Error loading settings: ${e.message}</p>`;
+        }
+    },
+
+    async handleFactoryReset() {
+        if (!confirm("⚠️ FINAL WARNING: Delete ALL Users, Products, and Orders?")) return;
+        const check = prompt("Type 'DELETE ALL' to confirm:");
+        if (check !== 'DELETE ALL') return alert("Cancelled.");
+
+        try {
+            Admin.showToast('Resetting Database... Please wait.', 'info');
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`${CONFIG.API_URL}/cms/reset-database`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                alert("✅ System Reset Complete! reloading...");
+                window.location.reload();
+            } else {
+                throw new Error('Reset failed');
+            }
+        } catch (e) {
+            alert(e.message);
         }
     },
 
