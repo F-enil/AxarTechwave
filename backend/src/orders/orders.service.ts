@@ -365,9 +365,25 @@ export class OrdersService {
     }
 
     async verifyPayment(orderId: number, paymentId: string, signature: string) {
-        // Implement Razorpay verification logic here
-        // crypto.createHmac('sha256', secret).update(orderId + "|" + paymentId).digest('hex');
-        // If matches signature -> Update order status to 'paid'
+        const secret = process.env.RAZORPAY_KEY_SECRET;
+        if (!secret) throw new Error('Razorpay Secret is missing in backend (.env)');
+
+        // Verify Signature
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const crypto = require('crypto');
+        const generated_signature = crypto
+            .createHmac('sha256', secret)
+            .update(orderId + "|" + paymentId)
+            .digest('hex');
+
+        if (generated_signature !== signature) {
+            throw new Error('Payment verification failed: Invalid Signature');
+        }
+
+        console.log(`[Payment] Verified Order #${orderId} with Payment ID ${paymentId}`);
+
+        // Update Order Status to 'paid'
+        // Also update 'paidAt' if schema supports it
 
         await this.prisma.order.update({
             where: { id: orderId },
