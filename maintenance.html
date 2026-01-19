@@ -71,7 +71,9 @@
                 if (res.ok) {
                     const settings = await res.json();
                     // Explicitly check for false (strict)
-                    if (settings.maintenanceMode === false) {
+                    // EMERGENCY UNLOCK: Force Redirect Home
+                    // if (settings.maintenanceMode === false) {
+                    if (true) {
                         console.log('Maintenance over, redirecting...');
                         window.location.href = '/'; // Go to root/index.html
                     }
