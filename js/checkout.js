@@ -1,4 +1,6 @@
 const Checkout = {
+    cartCache: null, // Store cart data to avoid re-fetching on every input
+
     init() {
         if (!Auth.isLoggedIn()) {
             // Check if on checkout page
@@ -12,14 +14,24 @@ const Checkout = {
             // Try to prefill address if logged in
             this.prefillAddress();
         }
+
+        // Clear cache and fetch fresh data on init
+        this.cartCache = null;
         this.renderCheckoutItems();
 
-        // Dynamic State Update Calculation
+        // Dynamic State Update Calculation (Debounced)
         const stateInput = document.getElementById('state');
         if (stateInput) {
-            stateInput.addEventListener('input', () => {
-                this.renderCheckoutItems();
-            });
+            let debounceTimer;
+            const updateHandler = () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    this.renderCheckoutItems();
+                }, 500); // 500ms debounce
+            };
+
+            stateInput.addEventListener('input', updateHandler);
+            // Remove 'change' listener safely or just overwrite if previously added (browsers handle multiple addEventListener mostly okay but best to be clean)
         }
     },
 
@@ -27,24 +39,19 @@ const Checkout = {
         try {
             const addresses = await API.get('/address');
             if (addresses && addresses.length > 0) {
-                // Find default or use first
                 const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
 
-                // Form Fields
                 const mapping = {
-                    'firstName': defaultAddr.name ? defaultAddr.name.split(' ')[0] : '', // simplistic name split if name field exists, else relies on input
+                    'firstName': defaultAddr.name ? defaultAddr.name.split(' ')[0] : '',
                     'address': defaultAddr.line1,
                     'city': defaultAddr.city,
                     'state': defaultAddr.state,
                     'zip': defaultAddr.pincode,
-                    // Add other fields if available in address object or user profile
                 };
 
-                // If user profile has detailed name/email/phone, those might be better source for contact info
                 const user = Auth.getUser();
                 if (user) {
                     if (document.getElementById('email')) document.getElementById('email').value = user.email || '';
-                    // If username has space, try to fallback split
                     if (user.username) {
                         const parts = user.username.split(' ');
                         if (document.getElementById('firstName')) document.getElementById('firstName').value = parts[0] || '';
@@ -52,16 +59,17 @@ const Checkout = {
                     }
                 }
 
-                // Fill address fields
                 for (const [id, value] of Object.entries(mapping)) {
                     const el = document.getElementById(id);
                     if (el && value) el.value = value;
                 }
 
-                // Phone from address might be fresher
                 if (defaultAddr.phone && document.getElementById('phone')) {
                     document.getElementById('phone').value = defaultAddr.phone;
                 }
+
+                // If state prefills, trigger update immediately
+                if (defaultAddr.state) this.renderCheckoutItems();
             }
         } catch (e) {
             console.log('No saved addresses to prefill');
@@ -111,38 +119,30 @@ const Checkout = {
 
     updateStepVisibility() {
         const steps = ['shipping-form', 'payment-form', 'order-review'];
-
-        // Hide all forms
         steps.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
 
-        // Show current form
         const currentId = steps[this.currentStep - 1];
         if (currentId) {
             const el = document.getElementById(currentId);
             if (el) el.style.display = 'block';
         }
 
-        // Update Step Indicators
         for (let i = 1; i <= 3; i++) {
             const circle = document.getElementById(`step-circle-${i}`);
             const label = document.getElementById(`step-label-${i}`);
 
             if (circle && label) {
-                if (i <= this.currentStep) { // Mark current and previous as active/completed
-                    // Active: Primary Color
+                if (i <= this.currentStep) {
                     circle.classList.remove('bg-gray-300', 'text-gray-600');
                     circle.classList.add('bg-primary', 'text-white');
-
                     label.classList.remove('text-gray-600');
                     label.classList.add('font-bold', 'text-primary');
                 } else {
-                    // Inactive: Gray Color
                     circle.classList.remove('bg-primary', 'text-white');
                     circle.classList.add('bg-gray-300', 'text-gray-600');
-
                     label.classList.remove('font-bold', 'text-primary');
                     label.classList.add('text-gray-600');
                 }
@@ -150,45 +150,48 @@ const Checkout = {
         }
     },
 
-    async renderCheckoutItems() { // existing function continuation...
-        const cart = await Cart.getCart();
+    async renderCheckoutItems() {
+        // Use cache if available, otherwise fetch
+        if (!this.cartCache) {
+            try {
+                this.cartCache = await Cart.getCart();
+            } catch (e) {
+                console.error("Failed to load cart for checkout", e);
+                return;
+            }
+        }
+
+        const cart = this.cartCache;
         const container = document.getElementById('checkout-items');
         const subtotalEl = document.getElementById('checkout-subtotal');
         const totalEl = document.getElementById('checkout-total');
         const taxEl = document.getElementById('checkout-tax');
 
         if (!container || !cart || !cart.items || cart.items.length === 0) {
-            console.log('Checkout: Cart is empty');
+            // ... (Empty state logic kept largely same but using safe checks) ... 
             const html = `
                 <div class="flex flex-col items-center justify-center py-12 text-center">
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Your cart is empty</h3>
                     <p class="text-gray-500 mb-6">Looks like you haven't added any items to the cart yet.</p>
                     <button onclick="showPage('shop')" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">Start Shopping</button>
-                    
                     <script>
-                        // Hide Summary/Steps if empty
-                        document.getElementById('checkout-steps')?.classList.add('hidden');
-                        document.getElementById('order-summary')?.classList.add('hidden');
+                         document.getElementById('checkout-steps')?.classList.add('hidden');
+                         document.getElementById('order-summary')?.classList.add('hidden');
                     </script>
                 </div>
             `;
             if (container) container.innerHTML = html;
-
-            // Zero out summary just in case
             if (subtotalEl) subtotalEl.innerText = '₹0';
             if (totalEl) totalEl.innerText = '₹0';
             const shippingRow = document.getElementById('checkout-shipping');
             if (shippingRow) shippingRow.innerText = '₹0';
 
-            // Hide the wrapper if possible to avoid showing "Shipping > Payment" headers
+            // Hide wrapper safely
             const checkoutWrapper = document.getElementById('checkout-main-grid');
-            if (checkoutWrapper) {
-                checkoutWrapper.innerHTML = html; // Replace entire checkout view with empty state
-            }
-
+            if (checkoutWrapper) checkoutWrapper.innerHTML = html;
             return;
         }
 
@@ -197,24 +200,27 @@ const Checkout = {
             const price = item.variant.prices[0]?.basePrice || 0;
             const itemTotal = price * item.quantity;
             total += itemTotal;
+            // Use safe optional chaining for media/url
+            const imgUrl = item.variant.product.media?.[0]?.url || item.variant.product.media?.[0]?.s3Key || 'images/placeholder.jpg';
+
             return `
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gray-200 rounded overflow-hidden bg-white">
-                             <img src="${item.variant.product.media?.[0]?.url || item.variant.product.media?.[0]?.s3Key || 'placeholder.jpg'}" alt="${item.variant.product.title}" class="w-full h-full object-contain">
+                             <img src="${imgUrl}" alt="${item.variant.product.title}" class="w-full h-full object-contain">
                         </div>
                         <div>
-                            <p class="font-medium text-sm">${item.variant.product.title}</p>
+                            <p class="font-medium text-sm line-clamp-1">${item.variant.product.title}</p>
                             <p class="text-xs text-gray-500">Qty: ${item.quantity}</p>
                         </div>
                     </div>
-                    <span class="font-medium text-sm">₹${itemTotal.toLocaleString()}</span>
+                    <span class="font-medium text-sm flex-shrink-0">₹${itemTotal.toLocaleString()}</span>
                 </div>
             `;
         }).join('');
 
-        container.innerHTML = html;
-        subtotalEl.innerText = `₹${total.toLocaleString()}`;
+        if (container) container.innerHTML = html;
+        if (subtotalEl) subtotalEl.innerText = `₹${total.toLocaleString()}`;
 
         // Tax & Shipping Calculation
         const shippingCost = 50;
@@ -222,60 +228,75 @@ const Checkout = {
         const state = stateEl ? stateEl.value.trim().toLowerCase() : '';
         const isGujarat = state.includes('gujarat');
 
-        // Calculate Tax Per Item
+        // Calculate Tax Components
+        let totalCGST = 0;
+        let totalSGST = 0;
+        let totalIGST = 0;
         let totalTax = 0;
+
         cart.items.forEach(item => {
             const price = item.variant.prices[0]?.basePrice || 0;
             const p = item.variant.product;
+            const quantity = item.quantity;
+            const taxableAmount = price * quantity;
 
-            let itemTax = 0;
             if (state && isGujarat) {
-                const cRate = p.cgst || 0;
-                const sRate = p.sgst || 0;
-                itemTax = (price * item.quantity * (cRate + sRate)) / 100;
+                // Intro-state: CGST + SGST
+                const cRate = p.cgst || 0; // e.g. 9
+                const sRate = p.sgst || 0; // e.g. 9
+
+                const cTax = (taxableAmount * cRate) / 100;
+                const sTax = (taxableAmount * sRate) / 100;
+
+                totalCGST += cTax;
+                totalSGST += sTax;
+                totalTax += (cTax + sTax);
             } else {
-                const iRate = p.igst || (p.taxRate || 18);
-                itemTax = (price * item.quantity * iRate) / 100;
+                // Inter-state: IGST
+                const iRate = p.igst || (p.taxRate || 18); // e.g. 18
+                const iTax = (taxableAmount * iRate) / 100;
+
+                totalIGST += iTax;
+                totalTax += iTax;
             }
-            totalTax += itemTax;
         });
 
         const finalTax = Math.round(totalTax);
+        const finalCGST = totalCGST; // Keep decimals for sub-components or round? usually tax is rounded at total
+        const finalSGST = totalSGST;
 
-        // Update Shipping Text
+        // Update Shipping
         const shippingRow = document.getElementById('checkout-shipping');
-        if (shippingRow) {
-            shippingRow.innerText = `₹${shippingCost}`;
-        }
+        if (shippingRow) shippingRow.innerText = `₹${shippingCost}`;
 
-        // Update Tax Text
-        const taxLabelRow = taxEl.parentElement;
+        // Update Tax Display
+        const taxLabelRow = document.getElementById('checkout-tax-row');
 
-        if (state && isGujarat) {
-            const halfTax = (finalTax / 2).toFixed(2);
-            if (taxLabelRow) {
+        if (taxLabelRow) {
+            if (state && isGujarat) {
+                // Show CGST + SGST breakdown
                 taxLabelRow.className = "flex flex-col gap-1 mt-2 border-t border-dashed border-gray-200 pt-2";
                 taxLabelRow.innerHTML = `
                     <div class="flex justify-between items-center w-full">
-                        <span class="text-gray-600 font-medium">CGST (Intra-state)</span>
-                        <span class="font-bold text-gray-900">₹${halfTax}</span>
+                        <span class="text-gray-600 font-medium">CGST</span>
+                        <span class="font-bold text-gray-900">₹${finalCGST.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div class="flex justify-between items-center w-full">
-                        <span class="text-gray-600 font-medium">SGST (Intra-state)</span>
-                        <span class="font-bold text-gray-900">₹${(finalTax - halfTax).toFixed(2)}</span>
+                        <span class="text-gray-600 font-medium">SGST</span>
+                        <span class="font-bold text-gray-900">₹${finalSGST.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 `;
-            }
-        } else {
-            if (taxLabelRow) {
+            } else {
+                // Show IGST / Total Tax
+                taxLabelRow.className = "flex justify-between";
                 taxLabelRow.innerHTML = `
-                    <span class="text-gray-600">Tax (${state ? 'IGST' : 'GST'})</span>
-                    <span class="font-medium" id="checkout-tax">₹${finalTax.toLocaleString()}</span>
+                    <span>Tax (${state ? 'IGST' : 'GST'}):</span>
+                    <span id="checkout-tax">₹${finalTax.toLocaleString()}</span>
                  `;
             }
         }
 
-        totalEl.innerText = `₹${Math.round(total + totalTax + shippingCost).toLocaleString()}`;
+        if (totalEl) totalEl.innerText = `₹${Math.round(total + totalTax + shippingCost).toLocaleString()}`;
     },
 
     async placeOrder() {
