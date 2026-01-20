@@ -112,7 +112,7 @@ export class OrdersService {
                 data: {
                     userId,
                     customId,
-                    status: 'created',
+                    status: (paymentMethod === 'cod') ? 'processing' : 'created',
                     total: finalTotal,
                     discount: 0,
                     currency: 'INR',
