@@ -178,16 +178,7 @@ export class OrdersService {
         return order;
     }
 
-    // Helper to check stock async without blocking
-    async checkStock(variantId: number, productTitle: string) {
-        try { // Safe check
-            const totalIn = await this.prisma.inventoryLedger.aggregate({ where: { variantId: variantId, type: 'in' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
-            const totalOut = await this.prisma.inventoryLedger.aggregate({ where: { variantId: variantId, type: 'out' }, _sum: { quantity: true } }).then(res => res._sum?.quantity || 0);
-            this.notificationService.checkStockLevel(variantId, productTitle, totalIn - totalOut);
-        } catch (e) {
-            console.error('Failed to run background stock check', e);
-        }
-    }
+
 
     async getOrders(userId: number) {
         const orders: any = await this.prisma.order.findMany({
@@ -468,7 +459,7 @@ export class OrdersService {
 
                 // Check Low Stock
                 // (Optimized: Fire and forget check)
-                this.checkStockAfterDeduction(item.variantId, item.variant?.product?.title || 'Product');
+                this.checkStock(item.variantId, item.variant?.product?.title || 'Product');
             }
         }
 
@@ -544,25 +535,29 @@ export class OrdersService {
                             reference: `order_webhook_${paidOrder.customId}`
                         }
                     });
-                    this.checkStockAfterDeduction(item.variantId, item.variant?.product?.title || 'Product');
+                    this.checkStock(item.variantId, item.variant?.product?.title || 'Product');
                 }
-    async updateTracking(id: number, trackingId: string, courierCompanyName: string, status ?: string) {
-                    const data: any = {
-                        trackingId,
-                        courierCompanyName
-                    };
+            }
+        }
+    }
 
-                    if (status) {
-                        data.status = status;
-                    } else {
-                        data.status = 'shipped';
-                    }
+    async updateTracking(id: number, trackingId: string, courierCompanyName: string, status?: string) {
+        const data: any = {
+            trackingId,
+            courierCompanyName
+        };
 
-                    return this.prisma.order.update({
-                        where: { id },
-                        data
-                    });
-                }
+        if (status) {
+            data.status = status;
+        } else {
+            data.status = 'shipped';
+        }
+
+        return this.prisma.order.update({
+            where: { id },
+            data
+        });
+    }
 
     private async processOrderImages(orders: any[]) {
         const productIds = new Set<number>();
