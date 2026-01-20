@@ -166,6 +166,10 @@ const Checkout = {
                 this.cartCache = await Cart.getCart();
             } catch (e) {
                 console.error("Failed to load cart for checkout", e);
+                if (e.message.includes('Session expired') || e.message.includes('Unauthorized')) {
+                    if (window.UI) UI.showToast('Session expired. Please login again.', 'error');
+                    setTimeout(() => Auth.logout(), 1500);
+                }
                 return;
             }
         }
