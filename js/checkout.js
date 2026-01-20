@@ -41,38 +41,47 @@ const Checkout = {
             if (addresses && addresses.length > 0) {
                 const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
 
+                // Name Splitting logic for Address Name
+                let fName = '';
+                let lName = '';
+                if (defaultAddr.name) {
+                    const parts = defaultAddr.name.trim().split(' ');
+                    fName = parts[0];
+                    lName = parts.slice(1).join(' ');
+                }
+
                 const mapping = {
-                    'firstName': defaultAddr.name ? defaultAddr.name.split(' ')[0] : '',
+                    'firstName': fName,
+                    'lastName': lName,
                     'address': defaultAddr.line1,
                     'city': defaultAddr.city,
                     'state': defaultAddr.state,
                     'zip': defaultAddr.pincode,
+                    'phone': defaultAddr.phone
                 };
 
                 const user = Auth.getUser();
                 if (user) {
                     if (document.getElementById('email')) document.getElementById('email').value = user.email || '';
-                    if (user.username) {
+
+                    // Fallback to username if address name was empty
+                    if (!fName && user.username) {
                         const parts = user.username.split(' ');
-                        if (document.getElementById('firstName')) document.getElementById('firstName').value = parts[0] || '';
-                        if (document.getElementById('lastName')) document.getElementById('lastName').value = parts.slice(1).join(' ') || '';
+                        mapping['firstName'] = parts[0] || '';
+                        mapping['lastName'] = parts.slice(1).join(' ') || '';
                     }
                 }
 
                 for (const [id, value] of Object.entries(mapping)) {
                     const el = document.getElementById(id);
-                    if (el && value) el.value = value;
-                }
-
-                if (defaultAddr.phone && document.getElementById('phone')) {
-                    document.getElementById('phone').value = defaultAddr.phone;
+                    if (el) el.value = value || '';
                 }
 
                 // If state prefills, trigger update immediately
                 if (defaultAddr.state) this.renderCheckoutItems();
             }
         } catch (e) {
-            console.log('No saved addresses to prefill');
+            console.log('No saved addresses to prefill', e);
         }
     },
 
