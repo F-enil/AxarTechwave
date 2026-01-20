@@ -210,20 +210,24 @@ const Checkout = {
 
         let total = 0;
         const html = cart.items.map(item => {
-            const price = item.variant.prices[0]?.basePrice || 0;
+            if (!item.variant || !item.variant.product) return ''; // Skip invalid items
+
+            const price = item.variant.prices?.[0]?.basePrice || 0;
             const itemTotal = price * item.quantity;
             total += itemTotal;
             // Use safe optional chaining for media/url
-            const imgUrl = item.variant.product.media?.[0]?.url || item.variant.product.media?.[0]?.s3Key || 'images/placeholder.jpg';
+            const product = item.variant.product;
+            const imgUrl = product.media?.[0]?.url || product.media?.[0]?.s3Key || 'images/placeholder.jpg';
+            const title = product.title || 'Unknown Product';
 
             return `
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gray-200 rounded overflow-hidden bg-white">
-                             <img src="${imgUrl}" alt="${item.variant.product.title}" class="w-full h-full object-contain">
+                             <img src="${imgUrl}" alt="${title}" class="w-full h-full object-contain">
                         </div>
                         <div>
-                            <p class="font-medium text-sm line-clamp-1">${item.variant.product.title}</p>
+                            <p class="font-medium text-sm line-clamp-1">${title}</p>
                             <p class="text-xs text-gray-500">Qty: ${item.quantity}</p>
                         </div>
                     </div>
