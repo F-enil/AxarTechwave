@@ -947,6 +947,45 @@ const UI = {
         }
     },
 
+    injectProductSchema(product) {
+        const schemaScriptId = 'product-schema-jsonld';
+        let script = document.getElementById(schemaScriptId);
+        if (!script) {
+            script = document.createElement('script');
+            script.id = schemaScriptId;
+            script.type = 'application/ld+json';
+            document.head.appendChild(script);
+        }
+
+        const variant = product.variants?.[0];
+        const price = variant?.prices?.[0]?.basePrice || 0;
+        const currency = 'INR';
+        const imageUrl = product.media?.[0]?.url || 'https://www.axartechwave.com/images/logo.png';
+
+        const schema = {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.title,
+            "image": imageUrl,
+            "description": product.description || `Buy ${product.title} at Axar TechWave.`,
+            "sku": variant?.sku || product.id,
+            "brand": {
+                "@type": "Brand",
+                "name": product.brand || "Axar TechWave"
+            },
+            "offers": {
+                "@type": "Offer",
+                "url": window.location.href,
+                "priceCurrency": currency,
+                "price": price,
+                "availability": (variant?.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                "itemCondition": "https://schema.org/NewCondition"
+            }
+        };
+
+        script.text = JSON.stringify(schema);
+    },
+
     async updateCartCount() {
         if (!Auth.isLoggedIn()) {
             const el = document.getElementById('cart-count');
