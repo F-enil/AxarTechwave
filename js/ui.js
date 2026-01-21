@@ -133,7 +133,10 @@ const UI = {
                         const isAdmin = user && (role === 'admin' || role === 'staff');
 
                         // If NOT admin AND NOT on maintenance/admin page -> Redirect
-                        if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html')) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const isLoginAction = urlParams.get('action') === 'login';
+
+                        if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html') && !isLoginAction) {
                             console.log('Maintenance mode enabled. Redirecting...');
                             window.location.href = 'maintenance.html';
                         }
