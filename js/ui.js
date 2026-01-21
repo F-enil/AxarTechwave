@@ -247,7 +247,8 @@ const UI = {
             ]);
 
             this.wishlistSet = new Set(wishlist.map(item => item.id));
-            this.allProducts = products; // Save for filtering
+            // Filter out products with no variants (invalid data)
+            this.allProducts = products.filter(p => p.variants && p.variants.length > 0);
 
             // Initialize State
             this.state.products = [...products];
@@ -340,7 +341,8 @@ const UI = {
         // 1. Filter by Category
         if (this.state.filters.categories.length > 0) {
             result = result.filter(p => {
-                const cat = p.category ? p.category.slug.toLowerCase() : '';
+                // Safeguard against null/missing category or slug
+                const cat = p.category && p.category.slug ? p.category.slug.toLowerCase() : 'uncategorized';
                 return this.state.filters.categories.includes(cat);
             });
         }
@@ -393,7 +395,12 @@ const UI = {
         if (!container) return;
 
         if (this.state.products.length === 0) {
-            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">No products found matching your filters.</p>';
+            const hasFilters = this.state.filters.categories.length > 0 || this.state.filters.brands.length > 0 || this.state.filters.priceRange;
+            const message = hasFilters
+                ? 'No products found matching your filters.'
+                : 'No products available at the moment.';
+
+            container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-8">${message}</p>`;
             if (countEl) countEl.innerText = 0;
             this.renderPagination(0);
             return;
@@ -1293,18 +1300,29 @@ const UI = {
             }
 
             // Dynamic Banner Logic
-            const bannerWrapper = document.getElementById('banner-wrapper');
-            if (bannerWrapper) {
-                if (settings.banners && Array.isArray(settings.banners) && settings.banners.length > 0) {
-                    const activeBanners = settings.banners.filter(b => b.active !== false);
-                    if (activeBanners.length > 0) {
-                        bannerWrapper.innerHTML = activeBanners.map(b => `
-                            <div class="swiper-slide">
-                                <img src="${b.imageUrl}" class="w-full h-full object-cover" alt="Banner">
-                            </div>
-                        `).join('');
-                    }
-                }
+            // Default Banners Logic
+            let activeBanners = [];
+            if (settings.banners && Array.isArray(settings.banners)) {
+                activeBanners = settings.banners.filter(b => b.active !== false);
+            }
+
+            const swiperSection = document.querySelector('.custom-swiper-hero');
+            const defaultHero = document.getElementById('default-hero');
+
+            if (activeBanners.length === 0) {
+                // No banners -> Show Static Default Hero
+                if (swiperSection) swiperSection.classList.add('hidden');
+                if (defaultHero) defaultHero.classList.remove('hidden');
+            } else {
+                // Has banners -> Show Swiper
+                if (swiperSection) swiperSection.classList.remove('hidden');
+                if (defaultHero) defaultHero.classList.add('hidden');
+
+                bannerWrapper.innerHTML = activeBanners.map(b => `
+                        <div class="swiper-slide">
+                            <img src="${b.imageUrl}" onerror="this.src='https://via.placeholder.com/1200x400?text=Axar+TechWave'" class="w-full h-full object-cover rounded-2xl" alt="Banner">
+                        </div>
+                    `).join('');
 
                 // Initialize Swiper (Main)
                 if (window.Swiper) {
