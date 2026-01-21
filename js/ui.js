@@ -181,12 +181,12 @@ const UI = {
         // Close sidebar on click outside
         document.addEventListener('click', (e) => {
             const sidebar = document.querySelector('.filter-sidebar');
-            const toggleBtn = document.querySelector('button[onclick="toggleFilters()"]');
+            const clickedToggle = e.target.closest('button[onclick="toggleFilters()"]');
 
-            // If sidebar is open, and click is NOT inside sidebar, and NOT on the toggle button
+            // If sidebar is open, and click is NOT inside sidebar, and NOT on Any toggle button
             if (sidebar && sidebar.classList.contains('open') &&
                 !sidebar.contains(e.target) &&
-                (!toggleBtn || !toggleBtn.contains(e.target))) {
+                !clickedToggle) {
                 sidebar.classList.remove('open');
             }
         });
