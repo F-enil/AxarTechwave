@@ -1,9 +1,13 @@
 const API = {
     async request(endpoint, method = 'GET', body = null) {
         const token = localStorage.getItem('access_token');
-        const headers = {
-            'Content-Type': 'application/json',
-        };
+        const headers = {};
+
+        // Auto-set JSON content type unless FormData (browser handles boundary)
+        if (!(body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -14,7 +18,7 @@ const API = {
         };
 
         if (body) {
-            config.body = JSON.stringify(body);
+            config.body = (body instanceof FormData) ? body : JSON.stringify(body);
             // DEBUG: Log the exact string being sent
             // console.log(`[API REQUEST] ${method} ${endpoint}`);
         }

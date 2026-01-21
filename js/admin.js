@@ -1401,13 +1401,51 @@ window.Admin = {
         }
     },
 
+    async uploadBannerImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const row = input.closest('.banner-row');
+        const imgPreview = row.querySelector('img');
+        const urlInput = row.querySelector('input[name="bannerUrl"]');
+        const originalText = urlInput.value;
+
+        // Optimistic UI
+        imgPreview.style.opacity = '0.5';
+        urlInput.value = 'Uploading...';
+        urlInput.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await API.post('/media/upload', formData);
+            // res = { url: '...', key: '...' }
+            urlInput.value = res.url;
+            imgPreview.src = res.url;
+            imgPreview.style.opacity = '1';
+            Admin.showToast('Image uploaded successfully!', 'success');
+        } catch (error) {
+            console.error(error);
+            Admin.showToast('Upload failed: ' + error.message, 'error');
+            urlInput.value = originalText;
+            imgPreview.src = originalText || 'https://via.placeholder.com/40';
+            imgPreview.style.opacity = '1';
+        } finally {
+            urlInput.disabled = false;
+        }
+    },
+
     getBannerRowHtml(banner = { imageUrl: '', active: true }) {
         return `
             <div class="flex items-center gap-2 banner-row bg-gray-50 p-2 rounded border">
-                 <div class="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+                 <div class="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden relative group">
                     <img src="${banner.imageUrl}" onerror="this.src='https://via.placeholder.com/40'" class="w-full h-full object-cover">
                  </div>
-                 <input type="text" name="bannerUrl" value="${banner.imageUrl}" class="flex-1 p-1.5 border rounded text-xs" placeholder="Image URL (images/banner.png)">
+                 <div class="flex-1 flex flex-col gap-1">
+                    <input type="text" name="bannerUrl" value="${banner.imageUrl}" class="w-full p-1.5 border rounded text-xs bg-white" placeholder="Image URL or Upload -->">
+                    <input type="file" accept="image/*" onchange="Admin.uploadBannerImage(this)" class="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                 </div>
                  <label class="flex items-center gap-1 text-xs text-gray-600 cursor-pointer select-none">
                     <input type="checkbox" name="bannerActive" class="text-primary" ${banner.active !== false ? 'checked' : ''}> On
                  </label>
@@ -1491,7 +1529,7 @@ window.Admin = {
             Admin.showToast('Site settings updated!', 'success');
         } catch (err) {
             console.error(err);
-            Admin.showToast('Failed to save settings', 'error');
+            Admin.showToast(err.message || 'Failed to save settings', 'error');
         } finally {
             btn.disabled = false;
             btn.innerText = 'Save Configuration';

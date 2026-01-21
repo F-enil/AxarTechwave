@@ -813,8 +813,7 @@
                 <!-- Hero Section - Swiper Enabled -->
                 <section class="relative z-10 container mx-auto px-4 mt-8 mb-8 flex justify-center custom-swiper-hero">
                     <div class="banner-container w-full relative group">
-                        <div class="swiper mySwiper w-full h-full rounded-2xl overflow-hidden shadow-2xl border-4"
-                            style="border-color: #daa520;">
+                        <div class="swiper mySwiper w-full h-full rounded-2xl overflow-hidden shadow-2xl">
                             <div class="swiper-wrapper" id="banner-wrapper">
                                 <div class="swiper-slide"><img src="images/banner_republic_day.png"
                                         class="w-full h-full object-cover" alt="Republic Day Sale"></div>
@@ -830,11 +829,11 @@
                         <!-- STATIC BUTTONS OVERLAY -->
                         <div
                             class="absolute bottom-6 md:bottom-12 left-0 right-0 z-20 flex justify-center gap-4 pointer-events-auto">
-                            <button onclick="showPage('shop')"
+                            <button onclick="showPage('shop'); window.scrollTo(0,0);"
                                 class="bg-white text-primary px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-sm md:text-lg shadow-lg hover:bg-gray-100 transition-all transform hover:scale-105">Shop
                                 Now</button>
-                            <button onclick="showPage('contact')"
-                                class="border-2 border-white text-white px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-sm md:text-lg hover:bg-white hover:text-primary transition-all backdrop-blur-sm bg-black/30">Contact
+                            <button onclick="showPage('contact'); window.scrollTo(0,0);"
+                                class="bg-primary text-white px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-sm md:text-lg shadow-lg hover:bg-opacity-90 transition-all transform hover:scale-105 border border-white">Contact
                                 Us</button>
                         </div>
                     </div>
@@ -863,11 +862,11 @@
                             <div class="bg-white rounded-lg p-6 text-center hover:shadow-lg transition-shadow cursor-pointer"
                                 onclick="filterByCategory('cases')">
                                 <div class="flex justify-center mb-4">
-                                    <svg class="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <rect x="7" y="4" width="10" height="16" rx="2" stroke-width="2" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 2h2" />
+                                    <!-- Simple Phone Case Icon as requested -->
+                                    <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" stroke-width="2">
+                                        <rect x="7" y="4" width="10" height="16" rx="2" />
+                                        <path d="M11 2h2" />
                                     </svg>
                                 </div>
                                 <h4 class="font-semibold text-primary">Cases</h4>

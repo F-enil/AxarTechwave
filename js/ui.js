@@ -869,7 +869,7 @@ const UI = {
         }
 
         // Hide all pages
-        document.querySelectorAll('.page-section').forEach(page => {
+        document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active');
             page.style.display = 'none'; // Ensure strict hiding
         });
