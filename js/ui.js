@@ -913,7 +913,12 @@ const UI = {
         window.scrollTo(0, 0);
 
         // Page specific loads
-        if (pageId === 'shop') this.loadProducts();
+        if (pageId === 'shop') {
+            // Reset filters to show all products
+            this.state.filters = { categories: [], brands: [], priceRange: null };
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            this.loadProducts();
+        }
         if (pageId === 'cart') this.updateCartDisplay();
         // Initialize page-specific scripts
         if (pageId === 'checkout') {
