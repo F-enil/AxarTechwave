@@ -178,6 +178,19 @@ const UI = {
         this.setupGlobalHandlers();
         this.setupSiteStatusCheck(); // <--- Combined polling
 
+        // Close sidebar on click outside
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.filter-sidebar');
+            const toggleBtn = document.querySelector('button[onclick="toggleFilters()"]');
+
+            // If sidebar is open, and click is NOT inside sidebar, and NOT on the toggle button
+            if (sidebar && sidebar.classList.contains('open') &&
+                !sidebar.contains(e.target) &&
+                (!toggleBtn || !toggleBtn.contains(e.target))) {
+                sidebar.classList.remove('open');
+            }
+        });
+
 
         // ... existing init code ...
 
@@ -317,6 +330,12 @@ const UI = {
         }
 
         this.applyLogic();
+
+        // Close Sidebar on Mobile after applying
+        const sidebar = document.querySelector('.filter-sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+        }
     },
 
     sortProducts(method) {
