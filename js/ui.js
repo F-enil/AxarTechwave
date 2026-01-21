@@ -1252,10 +1252,19 @@ const UI = {
                 const isAdmin = user && (role === 'admin' || role === 'staff');
 
                 // If not admin and not already on maintenance page OR admin page
-                if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html')) {
+                // ALLOW BYPASS if user explicitly wants to login (e.g. ?action=login)
+                const urlParams = new URLSearchParams(window.location.search);
+                const isLoginAction = urlParams.get('action') === 'login';
+
+                if (!isAdmin && !window.location.href.includes('maintenance.html') && !window.location.href.includes('admin.html') && !isLoginAction) {
                     // Use replace to avoid history stack issues
                     window.location.replace('maintenance.html');
                     return; // Stop further execution
+                }
+
+                if (isLoginAction && !isAdmin) {
+                    // If trying to login initiate modal
+                    setTimeout(() => this.openLoginModal(), 500);
                 }
             } else {
                 // Maintenance is OFF
