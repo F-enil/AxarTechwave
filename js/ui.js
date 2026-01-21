@@ -394,6 +394,8 @@ const UI = {
 
         if (!container) return;
 
+        console.log('%c[Shop Debug] Rendering Products:', 'color: orange', this.state.products.length, this.state.products);
+
         if (this.state.products.length === 0) {
             const hasFilters = this.state.filters.categories.length > 0 || this.state.filters.brands.length > 0 || this.state.filters.priceRange;
             const message = hasFilters
@@ -414,6 +416,8 @@ const UI = {
         const end = start + this.state.itemsPerPage;
         const paginatedProducts = this.state.products.slice(start, end);
 
+        console.log('[Shop Debug] Paginated Slice:', paginatedProducts);
+
         // Grid vs List View Classes
         if (this.state.view === 'list') {
             container.className = 'grid grid-cols-1 gap-6'; // Force single column
@@ -421,12 +425,15 @@ const UI = {
             container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'; // Default grid
         }
 
-        container.innerHTML = paginatedProducts.map(product => {
+        const html = paginatedProducts.map(product => {
             if (this.state.view === 'list') {
                 return this.renderProductListItem(product);
             }
             return this.renderProductCard(product);
         }).join('');
+
+        console.log('[Shop Debug] Generated HTML Length:', html.length);
+        container.innerHTML = html;
 
         this.renderPagination(this.state.products.length);
     },
@@ -921,6 +928,20 @@ const UI = {
         if (pageId === 'wishlist') this.loadWishlist();
     },
 
+    updateSEO(title, description, image) {
+        if (title) document.title = title;
+        if (description) {
+            const descMeta = document.querySelector('meta[name="description"]');
+            if (descMeta) descMeta.setAttribute('content', description);
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if (ogDesc) ogDesc.setAttribute('content', description);
+        }
+        if (image) {
+            const ogImage = document.querySelector('meta[property="og:image"]');
+            if (ogImage) ogImage.setAttribute('content', image);
+        }
+    },
+
     async updateCartCount() {
         if (!Auth.isLoggedIn()) {
             const el = document.getElementById('cart-count');
@@ -1306,23 +1327,30 @@ const UI = {
                 activeBanners = settings.banners.filter(b => b.active !== false);
             }
 
+            console.log('%c[Banner Debug] Active Banners:', 'background: #222; color: #bada55', activeBanners.length, activeBanners);
+
             const swiperSection = document.querySelector('.custom-swiper-hero');
             const defaultHero = document.getElementById('default-hero');
+            const bannerWrapper = document.getElementById('banner-wrapper'); // Re-select to be sure
 
             if (activeBanners.length === 0) {
                 // No banners -> Show Static Default Hero
+                console.log('[Banner Debug] Switching to Default Hero');
                 if (swiperSection) swiperSection.classList.add('hidden');
                 if (defaultHero) defaultHero.classList.remove('hidden');
             } else {
                 // Has banners -> Show Swiper
+                console.log('[Banner Debug] Switching to Swiper');
                 if (swiperSection) swiperSection.classList.remove('hidden');
                 if (defaultHero) defaultHero.classList.add('hidden');
 
-                bannerWrapper.innerHTML = activeBanners.map(b => `
+                if (bannerWrapper) {
+                    bannerWrapper.innerHTML = activeBanners.map(b => `
                         <div class="swiper-slide">
                             <img src="${b.imageUrl}" onerror="this.src='https://via.placeholder.com/1200x400?text=Axar+TechWave'" class="w-full h-full object-cover rounded-2xl" alt="Banner">
                         </div>
                     `).join('');
+                }
 
                 // Initialize Swiper (Main)
                 if (window.Swiper) {
