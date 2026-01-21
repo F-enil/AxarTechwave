@@ -1,10 +1,11 @@
-console.log('[Checkout Script] LOADED v0.3.7-DEBUG');
-const Checkout = {
+console.log('[Checkout Script] LOADED v0.3.8-FIX');
+
+window.Checkout = {
     cartData: null,
-    debugMode: true, // Force debug mode on to help user
+    debugMode: true,
 
     async init() {
-        this.log('Initializing Checkout v0.3.7-DEBUG...');
+        this.log('Initializing Checkout v0.3.8-FIX...');
         this.createDebugPanel();
 
         // 1. Auth Check
@@ -23,7 +24,7 @@ const Checkout = {
             this.log('Step A: DONE. Cart loaded.');
 
             this.log('Step B: Prefilling Address...');
-            await this.prefillAddress(); // Now we are sure HTML is preserved (showPage likely just toggles)
+            await this.prefillAddress();
             this.log('Step B: DONE. Address logic finished.');
 
             this.setupEventListeners();
@@ -61,7 +62,6 @@ const Checkout = {
             panel.scrollTop = panel.scrollHeight;
         }
     },
-    // -----------------------
 
     redirectToHome() {
         if (window.showPage) showPage('home');
@@ -109,7 +109,6 @@ const Checkout = {
             this.setInputValue('zip', defaultAddr.pincode);
             this.setInputValue('gstNumber', defaultAddr.gstNumber || '');
 
-            // Trigger tax recalculation if state is present
             if (defaultAddr.state) {
                 this.log('State found, triggering tax recalc...');
                 setTimeout(() => this.renderOrderSummary(), 500);
@@ -184,14 +183,12 @@ const Checkout = {
             if (!item.variant || !item.variant.product) return '';
 
             const product = item.variant.product;
-            // Robust Price Logic
             const price = item.variant.prices?.[0]?.basePrice || product.price || 0;
             const quantity = item.quantity;
             const itemTotal = price * quantity;
 
             subtotal += itemTotal;
 
-            // Tax Logic
             const taxRate = product.taxRate || 18;
             totalTax += (price * quantity * taxRate) / 100;
 
@@ -235,7 +232,6 @@ const Checkout = {
         }
 
         this.setText('checkout-total', `₹${Math.round(finalTotal).toLocaleString()}`);
-        this.log(`Totals Updated: Sub=${subtotal}, Tax=${finalTax}, Total=${finalTotal}`);
     },
 
     setText(id, text) {
@@ -268,7 +264,6 @@ const Checkout = {
         }
     },
 
-    // --- Step Navigation ---
     currentStep: 1,
 
     nextStep() {
@@ -337,12 +332,6 @@ const Checkout = {
     },
 
     async placeOrder() {
-        const btn = document.querySelector('button[onclick="placeOrder()"]');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerText = 'Processing...';
-        }
-
         try {
             const shippingAddress = {
                 firstName: document.getElementById('firstName')?.value || '',
@@ -375,10 +364,6 @@ const Checkout = {
         } catch (error) {
             console.error('[Checkout] Order placement failed:', error);
             if (window.UI) UI.showToast(error.message || 'Failed to place order', 'error');
-            if (btn) {
-                btn.disabled = false;
-                btn.innerText = 'Place Order';
-            }
         }
     },
 
