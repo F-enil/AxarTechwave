@@ -1,33 +1,66 @@
 const Checkout = {
-    // Cache cart to prevent excessive API calls
     cartData: null,
+    debugMode: true, // Force debug mode on to help user
 
     async init() {
-        console.log('[Checkout] Initializing v0.3.5...');
+        this.log('Initializing Checkout v0.3.7-DEBUG...');
+        this.createDebugPanel();
 
-        // 1. Auth Check - Redirect if not logged in
+        // 1. Auth Check
         if (!Auth.isLoggedIn()) {
-            console.log('[Checkout] User not logged in, redirecting...');
+            this.log('User not logged in. Redirecting.');
             if (window.UI) UI.showToast('Please login to proceed to checkout', 'info');
             this.redirectToHome();
             return;
         }
+        this.log('User is logged in.');
 
-        // 2. Initial Data Fetch (Parallel)
+        // 2. Sequential Data Load
         try {
-            await Promise.all([
-                this.prefillAddress(),
-                this.loadCartAndRender()
-            ]);
+            this.log('Step A: Loading Cart...');
+            await this.loadCartAndRender();
+            this.log('Step A: DONE. Cart loaded.');
+
+            this.log('Step B: Prefilling Address...');
+            await this.prefillAddress(); // Now we are sure HTML is preserved (showPage likely just toggles)
+            this.log('Step B: DONE. Address logic finished.');
 
             this.setupEventListeners();
-            console.log('[Checkout] Ready.');
+            this.log(' checkout.js Ready.');
 
         } catch (error) {
             console.error('[Checkout] Init failed:', error);
-            if (window.UI) UI.showToast('Failed to load checkout data. Please refresh.', 'error');
+            this.log(`CRITICAL ERROR: ${error.message}`);
+            if (window.UI) UI.showToast('Failed to load checkout data. See debug panel.', 'error');
         }
     },
+
+    // --- VISUAL DEBUGGER ---
+    createDebugPanel() {
+        if (document.getElementById('checkout-debug-panel')) return;
+        const div = document.createElement('div');
+        div.id = 'checkout-debug-panel';
+        div.style.cssText = `
+            position: fixed; top: 80px; left: 10px; width: 300px; max-height: 400px;
+            overflow-y: auto; background: rgba(0,0,0,0.85); color: #0f0;
+            font-family: monospace; font-size: 11px; padding: 10px; z-index: 9999;
+            border: 1px solid #0f0; border-radius: 4px; pointer-events: none;
+        `;
+        div.innerHTML = '<strong>Checkout Debugger</strong><br><hr style="border-color:#333">';
+        document.body.appendChild(div);
+    },
+
+    log(msg) {
+        console.log(`[Checkout] ${msg}`);
+        const panel = document.getElementById('checkout-debug-panel');
+        if (panel) {
+            const line = document.createElement('div');
+            line.innerText = `> ${msg}`;
+            panel.appendChild(line);
+            panel.scrollTop = panel.scrollHeight;
+        }
+    },
+    // -----------------------
 
     redirectToHome() {
         if (window.showPage) showPage('home');
@@ -37,14 +70,23 @@ const Checkout = {
     // --- Address Logic ---
     async prefillAddress() {
         try {
+            this.log('Fetching /address API...');
             const addresses = await API.get('/address');
-            if (!addresses || addresses.length === 0) return;
+
+            if (!addresses || addresses.length === 0) {
+                this.log('WARN: No addresses returned from API.');
+                return;
+            }
+            this.log(`API returned ${addresses.length} addresses.`);
 
             // Find default or first address
             const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
-            if (!defaultAddr) return;
+            if (!defaultAddr) {
+                this.log('WARN: No default address found.');
+                return;
+            }
 
-            console.log('[Checkout] Prefilling address:', defaultAddr);
+            this.log(`Selected Address: ${defaultAddr.name}, ${defaultAddr.city}`);
 
             // Fill Form Fields
             const fullName = defaultAddr.name || '';
@@ -52,10 +94,10 @@ const Checkout = {
             const fName = spaceIdx === -1 ? fullName : fullName.substring(0, spaceIdx);
             const lName = spaceIdx === -1 ? '' : fullName.substring(spaceIdx + 1);
 
+            // Detailed input check
             this.setInputValue('firstName', fName);
             this.setInputValue('lastName', lName);
 
-            // Get user email safely
             const user = Auth.getUser();
             this.setInputValue('email', user?.email || '');
 
@@ -63,17 +105,17 @@ const Checkout = {
             this.setInputValue('address', defaultAddr.line1);
             this.setInputValue('city', defaultAddr.city);
             this.setInputValue('state', defaultAddr.state);
-            this.setInputValue('zip', defaultAddr.pincode); // DB: pincode -> UI: zip
+            this.setInputValue('zip', defaultAddr.pincode);
             this.setInputValue('gstNumber', defaultAddr.gstNumber || '');
 
             // Trigger tax recalculation if state is present
             if (defaultAddr.state) {
-                // Wait for render to happen first if called in parallel
+                this.log('State found, triggering tax recalc...');
                 setTimeout(() => this.renderOrderSummary(), 500);
             }
 
         } catch (e) {
-            console.warn('[Checkout] Failed to prefill address:', e);
+            this.log(`ERROR in prefillAddress: ${e.message}`);
         }
     },
 
@@ -81,10 +123,10 @@ const Checkout = {
         const el = document.getElementById(id);
         if (el) {
             el.value = value || '';
-            // Trigger input event for any listeners
             el.dispatchEvent(new Event('input', { bubbles: true }));
+            this.log(`[OK] Set #${id} = "${value}"`);
         } else {
-            console.warn(`[Checkout] Input field not found: ${id}`);
+            this.log(`[FAIL] Input #${id} NOT FOUND in DOM.`);
         }
     },
 
@@ -101,13 +143,20 @@ const Checkout = {
     // --- Cart & Order Summary Logic ---
     async loadCartAndRender() {
         try {
-            // Fetch fresh cart data
+            this.log('Fetching /cart API...');
             this.cartData = await Cart.getCart();
+
+            if (!this.cartData) {
+                this.log('WARN: Cart API returned null.');
+                return;
+            }
+            this.log(`Cart loaded with ${this.cartData.items.length} items.`);
+
             this.renderOrderSummary();
         } catch (e) {
-            console.error('[Checkout] Failed to load cart:', e);
+            this.log(`ERROR loading cart: ${e.message}`);
             if (e.message && (e.message.includes('Session expired') || e.message.includes('Unauthorized'))) {
-                if (window.UI) UI.showToast('Session expired. Please login again.', 'error');
+                this.log('Session expired. Logging out.');
                 setTimeout(() => Auth.logout(), 1500);
             }
         }
@@ -115,15 +164,18 @@ const Checkout = {
 
     renderOrderSummary() {
         const container = document.getElementById('checkout-items');
-        if (!container) return;
+        if (!container) {
+            this.log('[FAIL] #checkout-items container NOT FOUND.');
+            return;
+        }
 
-        // 1. Check for Empty Cart
         if (!this.cartData || !this.cartData.items || this.cartData.items.length === 0) {
+            this.log('Cart is empty.');
             this.renderEmptyState(container);
             return;
         }
 
-        // 2. Render Items & Calculate Subtotal
+        this.log('Rendering Order Summary...');
         let subtotal = 0;
         let totalTax = 0;
 
@@ -131,15 +183,15 @@ const Checkout = {
             if (!item.variant || !item.variant.product) return '';
 
             const product = item.variant.product;
-            // Fallback price logic matching UI.js exactly
+            // Robust Price Logic
             const price = item.variant.prices?.[0]?.basePrice || product.price || 0;
             const quantity = item.quantity;
             const itemTotal = price * quantity;
 
             subtotal += itemTotal;
 
-            // Tax Calculation (accumulated per item matching UI.js)
-            const taxRate = product.taxRate || 18; // Default 18% if missing
+            // Tax Logic
+            const taxRate = product.taxRate || 18;
             totalTax += (price * quantity * taxRate) / 100;
 
             const imgUrl = product.media?.[0]?.url || product.media?.[0]?.s3Key || 'images/placeholder.jpg';
@@ -163,36 +215,32 @@ const Checkout = {
 
         container.innerHTML = itemsHtml;
 
-        // 3. Finalize Totals
         const shippingCost = 50;
         const finalTax = Math.round(totalTax);
         const finalTotal = subtotal + finalTax + shippingCost;
 
-        // 4. Update DOM Totals
         this.setText('checkout-subtotal', `₹${subtotal.toLocaleString()}`);
         this.setText('checkout-shipping', `₹${shippingCost}`);
 
-        // Tax Label Logic
-        const stateInput = document.getElementById('state');
-        const stateConf = stateInput ? stateInput.value.trim().toLowerCase() : '';
-        const isGujarat = stateConf.includes('gujarat');
         const taxEl = document.getElementById('checkout-tax-row');
-
         if (taxEl) {
-            // Simplify Tax Display to match Cart Page for consistency
             taxEl.className = "flex justify-between text-base";
             taxEl.innerHTML = `
                 <span>Tax:</span>
                 <span id="checkout-tax">₹${finalTax.toLocaleString()}</span>
              `;
+        } else {
+            this.log('WARN: #checkout-tax-row not found.');
         }
 
         this.setText('checkout-total', `₹${Math.round(finalTotal).toLocaleString()}`);
+        this.log(`Totals Updated: Sub=${subtotal}, Tax=${finalTax}, Total=${finalTotal}`);
     },
 
     setText(id, text) {
         const el = document.getElementById(id);
         if (el) el.innerText = text;
+        else this.log(`[FAIL] Text #${id} NOT FOUND.`);
     },
 
     renderEmptyState(container) {
@@ -212,6 +260,7 @@ const Checkout = {
             stateInput.addEventListener('input', () => {
                 if (this._debounce) clearTimeout(this._debounce);
                 this._debounce = setTimeout(() => {
+                    this.log('State changed. Recalculating totals...');
                     this.renderOrderSummary();
                 }, 500);
             });
@@ -223,7 +272,6 @@ const Checkout = {
 
     nextStep() {
         if (!this.validateStep(this.currentStep)) return;
-
         this.currentStep++;
         this.updateStepUI();
     },
