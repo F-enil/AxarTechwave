@@ -728,6 +728,9 @@ const UI = {
         this.injectProductSchema(product);
         // --- SEO UPDATE END ---
 
+        // Switch to Product Detail Page View
+        this.showPage('product');
+
         const container = document.getElementById('product-detail');
         if (!container) return;
 
@@ -916,7 +919,13 @@ const UI = {
         if (pageId === 'shop') {
             // Reset filters to show all products
             this.state.filters = { categories: [], brands: [], priceRange: null };
-            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            // Fix: Select inputs correctly as they don't have .filter-checkbox class
+            document.querySelectorAll('aside input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('aside input[name="price"]').forEach(r => r.checked = false);
+            // Check 'All' price if exists
+            const allPrice = document.querySelector('input[name="price"][value="all"]');
+            if (allPrice) allPrice.checked = true;
+
             this.loadProducts();
         }
         if (pageId === 'cart') this.updateCartDisplay();
@@ -1821,6 +1830,11 @@ const UI = {
             btn.disabled = false;
             btn.innerText = originalText;
         }
+    },
+
+    toggleFilters() {
+        const sidebar = document.querySelector('.filter-sidebar');
+        if (sidebar) sidebar.classList.toggle('open');
     }
 
 };
