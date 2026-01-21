@@ -1,3 +1,4 @@
+console.log('[Checkout Script] LOADED v0.3.7-DEBUG');
 const Checkout = {
     cartData: null,
     debugMode: true, // Force debug mode on to help user
