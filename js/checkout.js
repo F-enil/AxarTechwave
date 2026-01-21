@@ -2,11 +2,11 @@ console.log('[Checkout Script] LOADED v0.3.8-FIX');
 
 window.Checkout = {
     cartData: null,
-    debugMode: true,
+    debugMode: false, // Turn off debug mode for production
 
     async init() {
-        this.log('Initializing Checkout v0.3.8-FIX...');
-        this.createDebugPanel();
+        if (this.debugMode) this.log('Initializing Checkout v0.3.9-TAX...');
+        if (this.debugMode) this.createDebugPanel();
 
         // 1. Auth Check
         if (!Auth.isLoggedIn()) {
@@ -53,6 +53,7 @@ window.Checkout = {
     },
 
     log(msg) {
+        if (!this.debugMode) return; // Only log if debugMode is true
         console.log(`[Checkout] ${msg}`);
         const panel = document.getElementById('checkout-debug-panel');
         if (panel) {
@@ -177,7 +178,16 @@ window.Checkout = {
 
         this.log('Rendering Order Summary...');
         let subtotal = 0;
-        let totalTax = 0;
+
+        // Tax Accumulators
+        let totalCGST = 0;
+        let totalSGST = 0;
+        let totalIGST = 0;
+
+        // Determine State for Tax Logic
+        const stateInput = document.getElementById('state');
+        const stateVal = stateInput ? stateInput.value.trim().toLowerCase() : '';
+        const isGujarat = stateVal.includes('gujarat');
 
         const itemsHtml = this.cartData.items.map(item => {
             if (!item.variant || !item.variant.product) return '';
@@ -189,8 +199,18 @@ window.Checkout = {
 
             subtotal += itemTotal;
 
-            const taxRate = product.taxRate || 18;
-            totalTax += (price * quantity * taxRate) / 100;
+            // Product Specific Tax Rates
+            // Default to standard 9% CGST, 9% SGST, 18% IGST if missing
+            const cgstRate = product.cgst !== undefined ? product.cgst : 9;
+            const sgstRate = product.sgst !== undefined ? product.sgst : 9;
+            const igstRate = product.igst !== undefined ? product.igst : 18;
+
+            if (isGujarat) {
+                totalCGST += (itemTotal * cgstRate) / 100;
+                totalSGST += (itemTotal * sgstRate) / 100;
+            } else {
+                totalIGST += (itemTotal * igstRate) / 100;
+            }
 
             const imgUrl = product.media?.[0]?.url || product.media?.[0]?.s3Key || 'images/placeholder.jpg';
             const title = product.title || 'Unknown Product';
@@ -214,24 +234,41 @@ window.Checkout = {
         container.innerHTML = itemsHtml;
 
         const shippingCost = 50;
-        const finalTax = Math.round(totalTax);
+
+        // Final Tax Sum
+        const finalTax = isGujarat ? (totalCGST + totalSGST) : totalIGST;
         const finalTotal = subtotal + finalTax + shippingCost;
 
         this.setText('checkout-subtotal', `₹${subtotal.toLocaleString()}`);
         this.setText('checkout-shipping', `₹${shippingCost}`);
 
+        // Tax Breakdown Render
         const taxEl = document.getElementById('checkout-tax-row');
         if (taxEl) {
-            taxEl.className = "flex justify-between text-base";
-            taxEl.innerHTML = `
-                <span>Tax:</span>
-                <span id="checkout-tax">₹${finalTax.toLocaleString()}</span>
-             `;
-        } else {
-            this.log('WARN: #checkout-tax-row not found.');
+            taxEl.className = "flex flex-col gap-1 text-base border-t border-dashed border-gray-200 pt-2 pb-2";
+            if (isGujarat) {
+                taxEl.innerHTML = `
+                    <div class="flex justify-between text-gray-600 text-sm">
+                        <span>CGST:</span>
+                        <span>₹${totalCGST.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600 text-sm">
+                        <span>SGST:</span>
+                        <span>₹${totalSGST.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                    </div>
+                `;
+            } else {
+                taxEl.innerHTML = `
+                    <div class="flex justify-between text-gray-600 text-base">
+                        <span>IGST:</span>
+                        <span>₹${totalIGST.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                    </div>
+                `;
+            }
         }
 
         this.setText('checkout-total', `₹${Math.round(finalTotal).toLocaleString()}`);
+        if (this.debugMode) this.log(`Totals Updated: Sub=${subtotal}, Tax=${finalTax}, Total=${finalTotal}`);
     },
 
     setText(id, text) {
