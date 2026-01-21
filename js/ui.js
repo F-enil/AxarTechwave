@@ -249,7 +249,7 @@ const UI = {
             // Initialize State
             this.state.products = [...products];
 
-            this.renderFilteredProducts();
+            this.filterProducts();
             this.renderFeaturedProducts(products);
 
         } catch (error) {
@@ -270,6 +270,27 @@ const UI = {
         view: 'grid', // 'grid' or 'list'
         currentPage: 1,
         itemsPerPage: 9
+    },
+
+    // Category Redirect Logic
+    filterByCategory(category) {
+        // 1. Navigate to Shop
+        showPage('shop');
+
+        // 2. Clear existing checks
+        const catCheckboxes = document.querySelectorAll('input[type="checkbox"][value="smartphones"], input[type="checkbox"][value="accessories"], input[type="checkbox"][value="gadgets"], input[type="checkbox"][value="cases"]');
+        catCheckboxes.forEach(cb => cb.checked = false);
+
+        // 3. check specific category
+        const target = document.querySelector(`input[type="checkbox"][value="${category}"]`);
+        if (target) {
+            target.checked = true;
+            // 4. Trigger Filter
+            // this.filterProducts();
+
+            // Scroll to shop top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     },
 
     filterProducts() {
@@ -681,6 +702,15 @@ const UI = {
             return;
         }
 
+        // --- SEO UPDATE START ---
+        const firstImage = product.media?.[0]?.url || product.media?.[0]?.s3Key || 'https://www.axartechwave.com/images/logo.png';
+        const seoTitle = `${product.title} - Buy Online | Axar TechWave`;
+        const seoDesc = product.description ? product.description.substring(0, 150) + '...' : `Buy ${product.title} at best price in Surat.`;
+
+        this.updateSEO(seoTitle, seoDesc, firstImage);
+        this.injectProductSchema(product);
+        // --- SEO UPDATE END ---
+
         const container = document.getElementById('product-detail');
         if (!container) return;
 
@@ -832,12 +862,32 @@ const UI = {
     },
 
     showPage(pageId) {
-        // Hide all pages
-        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        // Close sidebar on mobile if open
+        const sidebar = document.querySelector('aside');
+        if (sidebar && !sidebar.classList.contains('hidden')) {
+            sidebar.classList.add('hidden');
+        }
 
-        // Show target page
+        // Hide all pages
+        document.querySelectorAll('.page-section').forEach(page => {
+            page.classList.remove('active');
+            page.style.display = 'none'; // Ensure strict hiding
+        });
+
+        // Show requested page if exists
         const target = document.getElementById(pageId + '-page');
-        if (target) target.classList.add('active');
+        if (target) {
+            target.classList.add('active');
+            target.style.display = 'block';
+            window.scrollTo(0, 0);
+
+            // --- SEO UPDATE FOR PAGES ---
+            if (pageId === 'home') this.updateSEO('Axar TechWave - Modern Tech, Vibrant Life', 'Best Electronics Store in Surat.', 'https://www.axartechwave.com/images/logo.png');
+            if (pageId === 'shop') this.updateSEO('Shop All Products - Axar TechWave', 'Browse our full collection of mobiles and accessories.', 'https://www.axartechwave.com/images/shop-banner.jpg');
+            if (pageId === 'about') this.updateSEO('About Us - Axar TechWave', 'Learn about our journey and mission.', 'https://www.axartechwave.com/images/about-us.jpg');
+            if (pageId === 'contact') this.updateSEO('Contact Us - Axar TechWave', 'Get in touch for support and inquiries.', 'https://www.axartechwave.com/images/contact.jpg');
+            // ---------------------------
+        }
 
         // Update Nav
         document.querySelectorAll('.page-nav').forEach(nav => nav.classList.remove('active'));
@@ -1230,8 +1280,46 @@ const UI = {
                 if (footerEmail && settings.contact.email) footerEmail.innerHTML = `✉️ ${settings.contact.email}`;
             }
 
+            // Dynamic Banner Logic
+            const bannerWrapper = document.getElementById('banner-wrapper');
+            if (bannerWrapper) {
+                if (settings.banners && Array.isArray(settings.banners) && settings.banners.length > 0) {
+                    const activeBanners = settings.banners.filter(b => b.active !== false);
+                    if (activeBanners.length > 0) {
+                        bannerWrapper.innerHTML = activeBanners.map(b => `
+                            <div class="swiper-slide">
+                                <img src="${b.imageUrl}" class="w-full h-full object-cover" alt="Banner">
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Initialize Swiper (Main)
+                if (window.Swiper) {
+                    new Swiper(".mySwiper", {
+                        loop: true,
+                        autoplay: {
+                            delay: 5000,
+                            disableOnInteraction: false,
+                        },
+                        pagination: {
+                            el: ".swiper-pagination",
+                            clickable: true,
+                        },
+                    });
+                }
+            }
+
         } catch (error) {
-            console.error('Failed to load site settings', error);
+            console.error('Failed to load site settings:', error);
+            // Fallback Init if api fails
+            if (window.Swiper && document.querySelector('.mySwiper')) {
+                new Swiper(".mySwiper", {
+                    loop: true,
+                    autoplay: { delay: 5000 },
+                    pagination: { el: ".swiper-pagination", clickable: true }
+                });
+            }
         }
     },
 
@@ -1640,6 +1728,7 @@ window.submitContactForm = (e) => UI.submitContactForm(e);
 window.handleLogin = (e) => UI.handleLogin(e);
 window.handleRegister = (e) => UI.handleRegister(e);
 window.showPage = (id) => UI.showPage(id);
+window.filterByCategory = (cat) => UI.filterByCategory(cat);
 window.showProductDetail = (id) => UI.showProductDetail(id);
 window.openLoginModal = () => UI.openLoginModal();
 window.closeLoginModal = () => UI.closeLoginModal();

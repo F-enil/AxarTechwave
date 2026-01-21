@@ -1310,6 +1310,15 @@ window.Admin = {
         try {
             const settings = await API.get('/cms/settings');
 
+            // Default Banners if none exist
+            if (!settings.banners) {
+                settings.banners = [
+                    { imageUrl: 'images/banner_republic_day.png', active: true },
+                    { imageUrl: 'images/banner_surat_offer.png', active: true },
+                    { imageUrl: 'images/banner_gadget_sale.png', active: true }
+                ];
+            }
+
             content.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Change Password -->
@@ -1356,9 +1365,19 @@ window.Admin = {
                                 <input type="checkbox" id="maintMode" name="maintenanceMode" class="w-5 h-5 text-red-600" ${settings.maintenanceMode ? 'checked' : ''}>
                                 <label for="maintMode" class="font-bold text-gray-700">Enable Maintenance Mode</label>
                             </div>
-                            <p class="text-xs text-gray-500 mb-4">When enabled, only admins can access the site.</p>
+                            
+                            <!-- Promotional Banners -->
+                            <div class="border-t pt-4 mt-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <label class="font-bold text-gray-700">Hero Banners</label>
+                                    <button type="button" onclick="Admin.addBannerRow()" class="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-opacity-90">+ Add Image</button>
+                                </div>
+                                <div id="banner-list" class="space-y-3">
+                                    ${settings.banners && settings.banners.length > 0 ? settings.banners.map(b => Admin.getBannerRowHtml(b)).join('') : '<p class="text-gray-400 text-sm">No banners. Add one to activate slider.</p>'}
+                                </div>
+                            </div>
 
-                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">Save Configuration</button>
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 w-full mt-4">Save Configuration</button>
                         </form>
                     </div>
 
@@ -1368,14 +1387,7 @@ window.Admin = {
                         <div class="flex items-center justify-between">
                              <div>
                                  <h4 class="font-bold text-gray-800">Factory Reset Database</h4>
-                                 <p class="text-xs text-gray-700 max-w-md mt-1">
-                                    This action will permanently delete:
-                                    <ul class="list-disc ml-5 mt-1 text-xs text-red-800">
-                                        <li>All Product Data & Images</li>
-                                        <li>All User Accounts & Credentials (except Admins)</li>
-                                        <li>All Orders, Invoices, and Payments</li>
-                                    </ul>
-                                 </p>
+                                 <p class="text-xs text-gray-700 max-w-md mt-1">Delete all data (Products, Orders, Users).</p>
                              </div>
                              <button onclick="Admin.handleFactoryReset()" class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 font-bold shadow transition-colors">
                                  🚨 RESET EVERYTHING
@@ -1387,6 +1399,30 @@ window.Admin = {
         } catch (e) {
             content.innerHTML = `<p class="text-red-500">Error loading settings: ${e.message}</p>`;
         }
+    },
+
+    getBannerRowHtml(banner = { imageUrl: '', active: true }) {
+        return `
+            <div class="flex items-center gap-2 banner-row bg-gray-50 p-2 rounded border">
+                 <div class="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+                    <img src="${banner.imageUrl}" onerror="this.src='https://via.placeholder.com/40'" class="w-full h-full object-cover">
+                 </div>
+                 <input type="text" name="bannerUrl" value="${banner.imageUrl}" class="flex-1 p-1.5 border rounded text-xs" placeholder="Image URL (images/banner.png)">
+                 <label class="flex items-center gap-1 text-xs text-gray-600 cursor-pointer select-none">
+                    <input type="checkbox" name="bannerActive" class="text-primary" ${banner.active !== false ? 'checked' : ''}> On
+                 </label>
+                 <button type="button" onclick="this.closest('.banner-row').remove()" class="text-red-500 hover:bg-red-100 p-1 rounded transition-colors" title="Remove">&times;</button>
+            </div>
+        `;
+    },
+
+    addBannerRow() {
+        const list = document.getElementById('banner-list');
+        // Clear empty message if present
+        if (list.querySelector('p')) list.innerHTML = '';
+        const temp = document.createElement('div');
+        temp.innerHTML = this.getBannerRowHtml();
+        list.appendChild(temp.firstElementChild);
     },
 
     async handleFactoryReset() {
@@ -1406,7 +1442,6 @@ window.Admin = {
             try {
                 data = await res.json();
             } catch (err) {
-                // If JSON parse fails, use text or status
                 throw new Error(`Server Error (${res.status}): ${res.statusText}`);
             }
 
@@ -1430,6 +1465,16 @@ window.Admin = {
         btn.innerText = 'Saving...';
 
         const formData = new FormData(form);
+
+        // Collect Banners
+        const banners = [];
+        const bannerRows = form.querySelectorAll('.banner-row');
+        bannerRows.forEach(row => {
+            const url = row.querySelector('[name="bannerUrl"]').value;
+            const active = row.querySelector('[name="bannerActive"]').checked;
+            if (url) banners.push({ imageUrl: url, active });
+        });
+
         const data = {
             title: formData.get('title'),
             contact: {
@@ -1437,7 +1482,8 @@ window.Admin = {
                 email: formData.get('email'),
                 address: formData.get('address')
             },
-            maintenanceMode: form.querySelector('[name="maintenanceMode"]').checked === true
+            maintenanceMode: form.querySelector('[name="maintenanceMode"]').checked === true,
+            banners: banners
         };
 
         try {

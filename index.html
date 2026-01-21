@@ -21,6 +21,36 @@
     <meta property="og:description" content="Shop the latest mobile phones, accessories, and gadgets">
     <meta property="og:image" content="https://www.axartechwave.com/og-image.jpg">
     <meta property="og:url" content="https://www.axartechwave.com">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Axar TechWave">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Axar TechWave - Electronics Store">
+    <meta name="twitter:description" content="Best mobile phones and accessories in Surat.">
+    <meta name="twitter:image" content="https://www.axartechwave.com/og-image.jpg">
+
+    <!-- Global Schema.org (Organization) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Axar TechWave",
+      "url": "https://www.axartechwave.com",
+      "logo": "https://www.axartechwave.com/images/logo.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-8849491216",
+        "contactType": "customer service",
+        "areaServed": "IN",
+        "availableLanguage": "en"
+      },
+      "sameAs": [
+        "https://www.instagram.com/axartechwave",
+        "https://www.facebook.com/axartechwave"
+      ]
+    }
+    </script>
 
     <!-- Launch Page Dependencies -->
     <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;600;700&display=swap" rel="stylesheet">
@@ -117,107 +147,7 @@
         .launch-card {
             background: rgba(255, 255, 255, 0.95);
             /* Opaque White */
-            border: 4px solid #daa520;
-            /* Solid Gold Border */
-
-            padding: 3rem 4rem;
-            border-radius: 20px;
-            text-align: center;
-            position: relative;
-            min-width: 320px;
-            max-width: 90%;
-
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.7),
-                /* Deep shadow */
-                0 0 0 2px #fff inset;
-            /* Inner white ring */
-
-            transform-style: preserve-3d;
-            animation: float-card 6s ease-in-out infinite;
-        }
-
-        .launch-logo-circle {
-            width: 160px;
-            height: 160px;
-            margin: -6rem auto 2rem auto;
-            /* Overlap top of card */
-            background: white;
-            border-radius: 50%;
-            padding: 10px;
-            border: 6px solid #daa520;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            position: relative;
-        }
-
-        .launch-logo-circle img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-            /* Remove inline spacing */
-        }
-
-        /* CARD TYPOGRAPHY */
-        .launch-card h2 {
-            font-family: 'Rasa', serif;
-            color: #b91c1c;
-            /* Deep Red Text */
-            font-size: 3rem;
-            margin: 0;
-            font-weight: 800;
-            text-shadow: none;
-            /* Clean Look */
-            line-height: 1.2;
-        }
-
-        .launch-card p {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.3rem;
-            color: #333;
-            /* Dark Grey for readability */
-            font-weight: 600;
-            margin: 0.5rem 0;
-        }
-
-        .highlight-gold {
-            color: #b45309;
-            /* Dark Gold/Bronze for contrast on white */
-            font-weight: 800;
-            font-size: 1.5rem;
-            display: block;
-            margin: 10px 0;
-        }
-
-        /* RIBBON - CENTER & BIG */
-        /* RIBBON - CENTER & PROMINENT */
-        #launch-ribbon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90vw;
-            max-width: 1000px;
-            /* Big Impact */
-            height: auto;
-            z-index: 60;
-            cursor: pointer;
-            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.3));
-            /* Deep Shadow for 3D feel */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            /* Bouncy Scale */
-        }
-
-        #launch-ribbon:hover {
-            transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        #launch-ribbon.cut {
-            animation: ribbon-snap 0.6s forwards ease-out;
+            /* Legacy Launch Card Styles Removed */
             pointer-events: none;
         }
 
@@ -626,7 +556,10 @@
                 transform: scale(1);
             }
         }
-
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        /* Mobile Menu */
         .filter-sidebar {
             transition: transform 0.3s ease;
         }
@@ -646,6 +579,33 @@
                 transform: translateX(0);
                 display: block !important;
             }
+        }
+
+        /* Swiper Banner Styles */
+        .banner-container {
+            height: 200px;
+        }
+
+        @media(min-width: 640px) {
+            .banner-container {
+                height: 300px;
+            }
+        }
+
+        @media(min-width: 768px) {
+            .banner-container {
+                height: 400px;
+            }
+        }
+
+        @media(min-width: 1024px) {
+            .banner-container {
+                height: 500px;
+            }
+        }
+
+        .swiper-pagination-bullet-active {
+            background-color: #daa520 !important;
         }
     </style>
 </head>
@@ -850,26 +810,34 @@
             <!-- Home Page -->
             <div id="home-page" class="page active">
                 <!-- Hero Section -->
-                <section class="hero-wave text-white py-20 relative">
-                    <div class="container mx-auto px-4 text-center relative z-10">
-                        <h2 class="font-heading text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
-                            Modern Tech, <span class="text-accent">Vibrant Life</span>
-                        </h2>
-                        <p class="text-xl mb-8 opacity-90 animate-fade-in-up" style="animation-delay: 0.2s">
-                            Discover the latest smartphones, accessories, and gadgets that power your digital lifestyle
-                        </p>
-                        <div class="flex flex-wrap gap-4 justify-center animate-fade-in-up"
-                            style="animation-delay: 0.4s">
-                            <button onclick="showPage('shop')" class="btn-primary px-8 py-3 rounded-lg font-medium">
-                                Shop Now
-                            </button>
+                <!-- Hero Section - Swiper Enabled -->
+                <section class="relative z-10 container mx-auto px-4 mt-8 mb-8 flex justify-center custom-swiper-hero">
+                    <div class="banner-container w-full relative group">
+                        <div class="swiper mySwiper w-full h-full rounded-2xl overflow-hidden shadow-2xl border-4"
+                            style="border-color: #daa520;">
+                            <div class="swiper-wrapper" id="banner-wrapper">
+                                <div class="swiper-slide"><img src="images/banner_republic_day.png"
+                                        class="w-full h-full object-cover" alt="Republic Day Sale"></div>
+                                <div class="swiper-slide"><img src="images/banner_surat_offer.png"
+                                        class="w-full h-full object-cover" alt="Surat Exclusive"></div>
+                                <div class="swiper-slide"><img src="images/banner_gadget_sale.png"
+                                        class="w-full h-full object-cover" alt="Gadget Sale"></div>
+                            </div>
+                            <!-- Swiper Pagination -->
+                            <div class="swiper-pagination"></div>
+                        </div>
+
+                        <!-- STATIC BUTTONS OVERLAY -->
+                        <div
+                            class="absolute bottom-6 md:bottom-12 left-0 right-0 z-20 flex justify-center gap-4 pointer-events-auto">
+                            <button onclick="showPage('shop')"
+                                class="bg-white text-primary px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-sm md:text-lg shadow-lg hover:bg-gray-100 transition-all transform hover:scale-105">Shop
+                                Now</button>
                             <button onclick="showPage('contact')"
-                                class="btn-secondary px-8 py-3 rounded-lg font-medium">
-                                Contact Us
-                            </button>
+                                class="border-2 border-white text-white px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-sm md:text-lg hover:bg-white hover:text-primary transition-all backdrop-blur-sm bg-black/30">Contact
+                                Us</button>
                         </div>
                     </div>
-                    <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent"></div>
                 </section>
 
                 <!-- Featured Categories -->
@@ -894,7 +862,14 @@
                             </div>
                             <div class="bg-white rounded-lg p-6 text-center hover:shadow-lg transition-shadow cursor-pointer"
                                 onclick="filterByCategory('cases')">
-                                <div class="text-4xl mb-4">🛡️</div>
+                                <div class="flex justify-center mb-4">
+                                    <svg class="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <rect x="7" y="4" width="10" height="16" rx="2" stroke-width="2" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 2h2" />
+                                    </svg>
+                                </div>
                                 <h4 class="font-semibold text-primary">Cases</h4>
                             </div>
                         </div>
@@ -2081,7 +2056,7 @@
     <!-- Backend Integration Scripts -->
     <script src="js/config.js?v=0.1"></script>
     <script src="js/api.js?v=0.1"></script>
-    <script src="js/ui.js?v=0.1"></script>
+    <script src="js/ui.js?v=0.2"></script>
     <script src="js/auth.js?v=0.1"></script>
     <script src="js/cart.js?v=0.1"></script>
     <script src="js/checkout.js?v=0.1"></script>
