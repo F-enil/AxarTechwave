@@ -1,66 +1,22 @@
-console.log('[Checkout Script] LOADED v0.3.8-FIX');
-
 window.Checkout = {
     cartData: null,
-    debugMode: false, // Turn off debug mode for production
 
     async init() {
-        if (this.debugMode) this.log('Initializing Checkout v0.3.9-TAX...');
-        if (this.debugMode) this.createDebugPanel();
-
         // 1. Auth Check
         if (!Auth.isLoggedIn()) {
-            this.log('User not logged in. Redirecting.');
             if (window.UI) UI.showToast('Please login to proceed to checkout', 'info');
             this.redirectToHome();
             return;
         }
-        this.log('User is logged in.');
 
         // 2. Sequential Data Load
         try {
-            this.log('Step A: Loading Cart...');
             await this.loadCartAndRender();
-            this.log('Step A: DONE. Cart loaded.');
-
-            this.log('Step B: Prefilling Address...');
             await this.prefillAddress();
-            this.log('Step B: DONE. Address logic finished.');
-
             this.setupEventListeners();
-            this.log(' checkout.js Ready.');
-
         } catch (error) {
             console.error('[Checkout] Init failed:', error);
-            this.log(`CRITICAL ERROR: ${error.message}`);
-            if (window.UI) UI.showToast('Failed to load checkout data. See debug panel.', 'error');
-        }
-    },
-
-    // --- VISUAL DEBUGGER ---
-    createDebugPanel() {
-        if (document.getElementById('checkout-debug-panel')) return;
-        const div = document.createElement('div');
-        div.id = 'checkout-debug-panel';
-        div.style.cssText = `
-            position: fixed; top: 80px; left: 10px; width: 300px; max-height: 400px;
-            overflow-y: auto; background: rgba(0,0,0,0.85); color: #0f0;
-            font-family: monospace; font-size: 11px; padding: 10px; z-index: 9999;
-            border: 1px solid #0f0; border-radius: 4px; pointer-events: none;
-        `;
-        div.innerHTML = '<strong>Checkout Debugger</strong><br><hr style="border-color:#333">';
-        document.body.appendChild(div);
-    },
-
-    log(msg) {
-        if (!this.debugMode) return; // Only log if debugMode is true
-        console.log(`[Checkout] ${msg}`);
-        const panel = document.getElementById('checkout-debug-panel');
-        if (panel) {
-            const line = document.createElement('div');
-            line.innerText = `> ${msg}`;
-            panel.appendChild(line);
-            panel.scrollTop = panel.scrollHeight;
+            if (window.UI) UI.showToast('Failed to load checkout data. Please refresh.', 'error');
         }
     },
 
@@ -72,23 +28,13 @@ window.Checkout = {
     // --- Address Logic ---
     async prefillAddress() {
         try {
-            this.log('Fetching /address API...');
             const addresses = await API.get('/address');
 
-            if (!addresses || addresses.length === 0) {
-                this.log('WARN: No addresses returned from API.');
-                return;
-            }
-            this.log(`API returned ${addresses.length} addresses.`);
+            if (!addresses || addresses.length === 0) return;
 
             // Find default or first address
             const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
-            if (!defaultAddr) {
-                this.log('WARN: No default address found.');
-                return;
-            }
-
-            this.log(`Selected Address: ${defaultAddr.name}, ${defaultAddr.city}`);
+            if (!defaultAddr) return;
 
             // Fill Form Fields
             const fullName = defaultAddr.name || '';
@@ -111,12 +57,11 @@ window.Checkout = {
             this.setInputValue('gstNumber', defaultAddr.gstNumber || '');
 
             if (defaultAddr.state) {
-                this.log('State found, triggering tax recalc...');
                 setTimeout(() => this.renderOrderSummary(), 500);
             }
 
         } catch (e) {
-            this.log(`ERROR in prefillAddress: ${e.message}`);
+            console.error('[Checkout] Address prefill error:', e);
         }
     },
 
@@ -125,9 +70,6 @@ window.Checkout = {
         if (el) {
             el.value = value || '';
             el.dispatchEvent(new Event('input', { bubbles: true }));
-            this.log(`[OK] Set #${id} = "${value}"`);
-        } else {
-            this.log(`[FAIL] Input #${id} NOT FOUND in DOM.`);
         }
     },
 
@@ -144,20 +86,14 @@ window.Checkout = {
     // --- Cart & Order Summary Logic ---
     async loadCartAndRender() {
         try {
-            this.log('Fetching /cart API...');
             this.cartData = await Cart.getCart();
 
-            if (!this.cartData) {
-                this.log('WARN: Cart API returned null.');
-                return;
-            }
-            this.log(`Cart loaded with ${this.cartData.items.length} items.`);
+            if (!this.cartData) return;
 
             this.renderOrderSummary();
         } catch (e) {
-            this.log(`ERROR loading cart: ${e.message}`);
+            console.error('[Checkout] Cart load error:', e);
             if (e.message && (e.message.includes('Session expired') || e.message.includes('Unauthorized'))) {
-                this.log('Session expired. Logging out.');
                 setTimeout(() => Auth.logout(), 1500);
             }
         }
@@ -165,18 +101,13 @@ window.Checkout = {
 
     renderOrderSummary() {
         const container = document.getElementById('checkout-items');
-        if (!container) {
-            this.log('[FAIL] #checkout-items container NOT FOUND.');
-            return;
-        }
+        if (!container) return;
 
         if (!this.cartData || !this.cartData.items || this.cartData.items.length === 0) {
-            this.log('Cart is empty.');
             this.renderEmptyState(container);
             return;
         }
 
-        this.log('Rendering Order Summary...');
         let subtotal = 0;
 
         // Tax Accumulators
@@ -200,7 +131,6 @@ window.Checkout = {
             subtotal += itemTotal;
 
             // Product Specific Tax Rates
-            // Default to standard 9% CGST, 9% SGST, 18% IGST if missing
             const cgstRate = product.cgst !== undefined ? product.cgst : 9;
             const sgstRate = product.sgst !== undefined ? product.sgst : 9;
             const igstRate = product.igst !== undefined ? product.igst : 18;
@@ -268,13 +198,11 @@ window.Checkout = {
         }
 
         this.setText('checkout-total', `₹${Math.round(finalTotal).toLocaleString()}`);
-        if (this.debugMode) this.log(`Totals Updated: Sub=${subtotal}, Tax=${finalTax}, Total=${finalTotal}`);
     },
 
     setText(id, text) {
         const el = document.getElementById(id);
         if (el) el.innerText = text;
-        else this.log(`[FAIL] Text #${id} NOT FOUND.`);
     },
 
     renderEmptyState(container) {
@@ -294,13 +222,13 @@ window.Checkout = {
             stateInput.addEventListener('input', () => {
                 if (this._debounce) clearTimeout(this._debounce);
                 this._debounce = setTimeout(() => {
-                    this.log('State changed. Recalculating totals...');
                     this.renderOrderSummary();
                 }, 500);
             });
         }
     },
 
+    // --- Step Navigation ---
     currentStep: 1,
 
     nextStep() {
@@ -369,6 +297,12 @@ window.Checkout = {
     },
 
     async placeOrder() {
+        const btn = document.querySelector('button[onclick="placeOrder()"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = 'Processing...';
+        }
+
         try {
             const shippingAddress = {
                 firstName: document.getElementById('firstName')?.value || '',
@@ -401,6 +335,10 @@ window.Checkout = {
         } catch (error) {
             console.error('[Checkout] Order placement failed:', error);
             if (window.UI) UI.showToast(error.message || 'Failed to place order', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = 'Place Order';
+            }
         }
     },
 

@@ -850,14 +850,10 @@ const UI = {
         if (pageId === 'cart') this.updateCartDisplay();
         // Initialize page-specific scripts
         if (pageId === 'checkout') {
-            console.log('[UI] Opening checkout page. Checking for window.Checkout...');
             if (window.Checkout) {
-                console.log('[UI] Found window.Checkout. Initializing...');
                 window.Checkout.init();
             } else {
-                console.error('[UI] window.Checkout is UNDEFINED! Script execution failed or file not loaded.');
-                // Fallback: try to manually re-inject script if missing (extreme measure)
-                alert('CRITICAL ERROR: Checkout script not loaded. Please refresh.');
+                console.error('Checkout script not loaded.');
             }
         }
         if (pageId === 'orders') this.loadOrderHistory();
