@@ -194,6 +194,23 @@ const UI = {
 
         // ... existing init code ...
 
+        // Handle Back/Forward Navigation
+        window.addEventListener('popstate', (e) => {
+            const pageId = e.state ? e.state.pageId : (window.location.pathname.substring(1) || 'home');
+            this.showPage(pageId, false);
+        });
+
+        // Handle Initial URL
+        const path = window.location.pathname.substring(1);
+        const queryPage = new URLSearchParams(window.location.search).get('page');
+        // Prefer path, fallback to query, default to home
+        const startPage = path || queryPage || 'home';
+
+        // We pass false to avoid pushing state on initial load (preserving browser history integrity)
+        // But if it was a query param, we might want to "upgrade" it to clean URL? 
+        // For simplicity, just render.
+        this.showPage(startPage, false);
+
         this.updateCartCount();
         this.loadSiteSettings();
     },
@@ -900,7 +917,13 @@ const UI = {
         input.value = val;
     },
 
-    showPage(pageId) {
+    showPage(pageId, pushState = true) {
+        // Update URL
+        if (pushState) {
+            const url = pageId === 'home' ? '/' : `/${pageId}`;
+            window.history.pushState({ pageId }, '', url);
+        }
+
         // Close sidebar on mobile if open
         const sidebar = document.querySelector('aside');
         if (sidebar && !sidebar.classList.contains('hidden')) {
