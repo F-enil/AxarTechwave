@@ -996,6 +996,20 @@ const UI = {
             const ogImage = document.querySelector('meta[property="og:image"]');
             if (ogImage) ogImage.setAttribute('content', image);
         }
+
+        // Update Canonical URL
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.setAttribute('rel', 'canonical');
+            document.head.appendChild(canonical);
+        }
+        // Construct clean URL (origin + pathname), ensuring no query params for canonical
+        let cleanUrl = window.location.origin + window.location.pathname;
+        if (cleanUrl.endsWith('/') && cleanUrl !== window.location.origin + '/') {
+            cleanUrl = cleanUrl.slice(0, -1); // Remove trailing slash for subpages if desired, standard is usually with or without.
+        }
+        canonical.setAttribute('href', cleanUrl);
     },
 
     injectProductSchema(product) {
