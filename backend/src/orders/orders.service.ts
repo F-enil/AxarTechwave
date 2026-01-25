@@ -409,7 +409,7 @@ export class OrdersService {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const Razorpay = require('razorpay');
         const instance = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_StI6U92j5N2G7e', // Use env or fallback
+            key_id: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY || 'rzp_test_StI6U92j5N2G7e', // Support both var names
             key_secret: secret,
         });
 
@@ -421,7 +421,24 @@ export class OrdersService {
 
             // 2. Check Status
             // status can be 'authorized' (if auto-capture pending) or 'captured' (if success)
-            if (payment.status === 'captured' || payment.status === 'authorized') {
+            if (payment.status === 'authorized') {
+                console.log(`[Payment] Status is authorized. Attempting auto-capture...`);
+                try {
+                    const captureResponse = await instance.payments.capture(paymentId, payment.amount, payment.currency);
+                    console.log(`[Payment] Auto-captured successfully:`, captureResponse.id);
+                    payment.status = 'captured'; // Treat as captured
+                } catch (captureError) {
+                    console.error(`[Payment] Auto-capture failed: ${captureError.message}`);
+                    // Fallback: We still accept 'authorized' as proof of money effectively held, 
+                    // but we warn. Ideally, we throw if capture fails, but let's be lenient 
+                    // to prevent user frustration if dashboard settings are strict.
+                    // Actually, if capture fails, it usually means something critical.
+                    // Let's THROW to be safe against fraud or reversals.
+                    throw new Error(`Payment Authorized but Auto-Capture Failed: ${captureError.message}`);
+                }
+            }
+
+            if (payment.status === 'captured') {
                 console.log(`[Payment] Verified via API: Status is ${payment.status}`);
 
                 // 3. Mark Order as Paid
