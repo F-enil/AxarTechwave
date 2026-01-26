@@ -488,28 +488,33 @@ export class OrdersService {
         }
 
         // Deduct Stock on Payment Success
-        // We need to fetch the order items first
-        const paidOrder = await this.prisma.order.findUnique({
-            where: { id: orderId },
-            include: { items: { include: { variant: { include: { product: true } } } } }
-        });
+        try {
+            // We need to fetch the order items first
+            const paidOrder = await this.prisma.order.findUnique({
+                where: { id: orderId },
+                include: { items: { include: { variant: { include: { product: true } } } } }
+            });
 
-        if (paidOrder && paidOrder.items) {
-            for (const item of paidOrder.items) {
-                // Deduct Stock
-                await this.prisma.inventoryLedger.create({
-                    data: {
-                        variantId: item.variantId,
-                        quantity: item.quantity,
-                        type: 'out',
-                        reference: `order_paid_${paidOrder.customId}`
-                    }
-                });
+            if (paidOrder && paidOrder.items) {
+                for (const item of paidOrder.items) {
+                    // Deduct Stock
+                    await this.prisma.inventoryLedger.create({
+                        data: {
+                            variantId: item.variantId,
+                            quantity: item.quantity,
+                            type: 'out',
+                            reference: `order_paid_${paidOrder.customId}`
+                        }
+                    });
 
-                // Check Low Stock
-                // (Optimized: Fire and forget check)
-                this.checkStock(item.variantId, item.variant?.product?.title || 'Product');
+                    // Check Low Stock (Optimized: Fire and forget check)
+                    this.checkStock(item.variantId, item.variant?.product?.title || 'Product');
+                }
             }
+        } catch (stockError) {
+            console.error('[Payment] Stock Deduction Failed (Non-fatal):', stockError);
+            // We do NOT throw here. The money is taken, order is paid. 
+            // Admin can fix stock later.
         }
 
         return { success: true };
