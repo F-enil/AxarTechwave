@@ -1082,7 +1082,12 @@ const UI = {
                 }
             });
 
-            if (!response.ok) throw new Error('Failed to generate invoice');
+            if (!response.ok) {
+                const errText = await response.text();
+                let errMsg = 'Failed to generate invoice';
+                try { errMsg = JSON.parse(errText).message; } catch (e) { errMsg = errText; }
+                throw new Error(errMsg);
+            }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -1095,7 +1100,7 @@ const UI = {
             a.remove();
         } catch (error) {
             console.error(error);
-            this.showToast('Could not download invoice', 'error');
+            this.showToast(error.message || 'Could not download invoice', 'error');
         }
     },
 
