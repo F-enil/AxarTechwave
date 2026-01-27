@@ -94,7 +94,11 @@ export class OrdersService {
             }
 
             // Create Order
-            const shippingCost = 50;
+            // Check User Role for Shipping Waiver
+            const orderUser = await tx.user.findUnique({ where: { id: userId } });
+            const isAdmin = orderUser && orderUser.role === 'admin';
+            const shippingCost = isAdmin ? 0 : 50;
+
             const finalTotal = total + totalTax + shippingCost;
 
             const taxDetails = {
