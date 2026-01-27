@@ -1,21 +1,16 @@
 const Auth = {
     async login(email, password) {
+        const loader = document.getElementById('custom-loader');
+        if (loader) loader.classList.remove('hidden');
 
         try {
             const response = await API.post('/auth/login', { email, password });
 
-
             if (response.access_token) {
-
                 localStorage.setItem('access_token', response.access_token);
-
                 const parts = response.access_token.split('.');
                 const payload = JSON.parse(atob(parts[1]));
-
-
                 localStorage.setItem('user', JSON.stringify(payload));
-
-
                 return true;
             } else {
                 console.warn('[Auth] No access_token in response');
@@ -26,10 +21,15 @@ const Auth = {
             if (typeof UI !== 'undefined' && UI.showToast) UI.showToast(error.message, 'error');
             else alert(error.message);
             return false;
+        } finally {
+            if (loader) loader.classList.add('hidden');
         }
     },
 
     async signup(email, username, password) {
+        const loader = document.getElementById('custom-loader');
+        if (loader) loader.classList.remove('hidden');
+
         try {
             await API.post('/auth/signup', { email, username, password });
             return await this.login(email, password);
@@ -37,6 +37,8 @@ const Auth = {
             if (typeof UI !== 'undefined' && UI.showToast) UI.showToast(error.message, 'error');
             else alert(error.message);
             return false;
+        } finally {
+            if (loader) loader.classList.add('hidden');
         }
     },
 

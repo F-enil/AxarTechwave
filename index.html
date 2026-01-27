@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" class="overflow-x-hidden">
+<body class="bg-gray-50 text-gray-800 font-body antialiased">
+    <!-- Custom Logo Loader -->
+    <div id="custom-loader" class="fixed inset-0 z-[100000] flex flex-col items-center justify-center bg-white hidden">
+        <div class="relative w-32 h-32 mb-4">
+            <!-- Logo -->
+            <img src="images/logo.png" class="w-full h-full object-contain animate-pulse">
+            <!-- Spinner Ring -->
+            <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p class="text-primary font-bold text-xl tracking-widest animate-pulse">LOADING...</p>
+    </div>
 
 <head>
     <meta charset="UTF-8">
@@ -54,185 +65,9 @@
     }
     </script>
 
-    <!-- Launch Page Dependencies -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;600;700&family=Playfair+Display:wght@700&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <style>
-        /* PRESENCE: Grand Launch Overlay */
-        #launch-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: 99999;
-            /* Minimalist: Blurred White Overlay */
-            /* Minimalist: Blurred White Overlay */
-            background: rgba(255, 255, 255, 0.95);
-            /* More opaque, no blur cost */
-            /* backdrop-filter: blur(12px); <-- CRASH RISK ON MOBILE */
-            /* -webkit-backdrop-filter: blur(12px); */
-            overflow: hidden;
-            display: none;
-            transition: opacity 1s ease;
-        }
 
-        #launch-overlay.active {
-            display: block;
-        }
 
-        #launch-overlay.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* REALISTIC CURTAINS (Hidden/Unused) */
-        .curtain-panel {
-            display: none;
-        }
-
-        /* SPOTLIGHT GLOW */
-        .spotlight-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 80vh;
-            background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
-            /* Soft Red Glow */
-            z-index: 25;
-            pointer-events: none;
-            animation: pulse-glow 4s infinite alternate;
-        }
-
-        /* CONTENT CONTAINER (Hidden) */
-        .launch-content {
-            display: none;
-        }
-
-        .launch-content.fade-out {
-            display: none;
-        }
-
-        /* GOD HEADER - BRIGHT GOLD & LEGIBLE */
-        .god-header {
-            position: absolute;
-            top: 5%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-            padding: 0 1rem;
-            z-index: 50;
-            /* Ensure on top */
-
-            font-family: 'Rasa', serif;
-            font-weight: 700;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
-
-            /* Bright Gold Gradient */
-            background: linear-gradient(to bottom, #FFD700 0%, #FDB931 50%, #FFD700 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            /* solid fallback */
-            color: #FFD700;
-
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
-        }
-
-        /* PREMIUM WHITE CARD (High Contrast) */
-        .launch-card {
-            background: rgba(255, 255, 255, 0.95);
-            /* Opaque White */
-            /* Legacy Launch Card Styles Removed */
-            pointer-events: none;
-        }
-
-        @keyframes ribbon-snap {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            30% {
-                transform: translate(-50%, -50%) scale(0.9) rotate(-3deg);
-            }
-
-            /* Tension */
-            50% {
-                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
-                opacity: 1;
-            }
-
-            /* Snap */
-            100% {
-                transform: translate(-50%, -50%) scale(3);
-                opacity: 0;
-                filter: blur(20px);
-            }
-
-            /* Explode */
-        }
-
-        @keyframes pulse-glow {
-            from {
-                opacity: 0.5;
-            }
-
-            to {
-                opacity: 0.8;
-            }
-        }
-
-        @keyframes float-card {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .launch-card {
-                padding: 1.5rem;
-                width: 90%;
-            }
-
-            .launch-logo-circle {
-                width: 120px;
-                height: 120px;
-            }
-
-            .launch-card h2 {
-                font-size: 2rem;
-            }
-
-            .god-header {
-                font-size: 1rem;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
-                top: 5%;
-            }
-
-            /* SAFETY: Disable heavy animations on mobile */
-            .launch-card {
-                animation: none !important;
-                transform: none !important;
-            }
-        }
-    </style>
 
     <!-- Fonts -->
     <link
@@ -2086,7 +1921,7 @@
     <script src="js/checkout.js?v=0.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="js/admin.js?v=0.1"></script>
-    <script src="js/launch.js?v=0.1"></script>
+
     <script>
         // Inline overrides removed. Using centralized UI.js logic.
     </script>
@@ -2135,118 +1970,6 @@
             </form>
         </div>
     </div>
-    <!-- Launch Logic Script -->
-    <!-- Launch Logic Script (Duplicate Removed) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            return; // Duplicate Logic Neutralized
-            // 1. Check Admin Status
-            const userJson = localStorage.getItem('user');
-            let isAdmin = false;
-            try {
-                const user = userJson ? JSON.parse(userJson) : null;
-                isAdmin = user && user.role === 'admin';
-            } catch (e) { console.error('Auth Check Failed', e); }
 
-            // URL Override for testing even if not logged in
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('admin') === 'true') isAdmin = true;
-
-            if (!isAdmin) return; // Exit if not admin
-
-            // 2. Setup Elements
-            const overlay = document.getElementById('launch-overlay');
-            const transLogo = document.getElementById('launch-transition-logo');
-            let isAnimating = false;
-
-            // 3. Define Animation Sequence
-            const triggerLaunchAnimation = () => {
-                if (isAnimating) return;
-                isAnimating = true;
-
-                // Reset State
-                overlay.style.display = 'block';
-                overlay.style.opacity = '1';
-                // TRANSPARENT BACKGROUND (As requested)
-                overlay.style.backgroundColor = 'transparent';
-                overlay.style.backdropFilter = 'none'; // Clear blur if transparent
-
-                // Reset Logo
-                transLogo.style.opacity = '0';
-                transLogo.style.transition = 'none';
-                transLogo.style.transform = 'translate(-50%, -50%) scale(0.5) rotate(0deg)';
-                transLogo.style.position = 'absolute';
-                transLogo.style.top = '50%';
-                transLogo.style.left = '50%';
-                transLogo.style.width = '250px';
-                transLogo.style.height = 'auto';
-
-                // Force Reflow
-                void transLogo.offsetWidth;
-
-                // Phase 1: Zoom In Center (1.5s)
-                transLogo.style.transition = 'all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                transLogo.style.opacity = '1';
-                // Start Zoom
-                transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(0deg)';
-
-                // Phase 2: Spin & Confetti
-                // Spin starts after zoom (1.5s delay)
-                setTimeout(() => {
-                    // FASTER SPIN (2s instead of 3s)
-                    transLogo.style.transition = 'transform 2s linear';
-                    transLogo.style.transform = 'translate(-50%, -50%) scale(1.5) rotate(360deg)';
-                }, 1500);
-
-                // Phase 2b: Confetti Blast
-                const duration = 4000;
-                const end = Date.now() + duration;
-                const colors = ['#bb0000', '#ffffff', '#FFD700', '#FF4500'];
-
-                (function frame() {
-                    confetti({ particleCount: 6, angle: 60, spread: 80, origin: { x: 0, y: 0.6 }, colors: colors });
-                    confetti({ particleCount: 6, angle: 120, spread: 80, origin: { x: 1, y: 0.6 }, colors: colors });
-                    if (Date.now() < end) requestAnimationFrame(frame);
-                }());
-
-                // Phase 3: Fly to Header
-                // Start after Zoom(1.5s) + Spin(2s) + slight hold = ~4s
-                setTimeout(() => {
-                    const headerLogo = document.querySelector('header img');
-                    if (headerLogo) {
-                        const rect = headerLogo.getBoundingClientRect();
-
-                        // Fly Animation (1.5s)
-                        transLogo.style.transition = 'all 1.5s ease-in-out';
-
-                        transLogo.style.width = rect.width + 'px';
-                        transLogo.style.height = rect.height + 'px';
-                        transLogo.style.top = rect.top + 'px';
-                        transLogo.style.left = rect.left + 'px';
-                        // SPIN WHILE FLYING: Go from 360deg -> 720deg (One full spin during flight)
-                        transLogo.style.transform = 'translate(0, 0) scale(1) rotate(720deg)';
-                    }
-
-                }, 4000);
-
-                // Phase 4: Finish (4s start + 1.5s fly + buffer)
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    isAnimating = false;
-                }, 6000);
-            };
-
-            // 4. Attach Listener
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') triggerLaunchAnimation();
-            });
-
-            console.log('Ez Launch Ready for Admin');
-        });
-
-        // FIX LOGIN MODAL NOT CLOSING - REMOVED (Handled by UI.js)
-    </script>
-    </script>
-</body>
 
 </html>
