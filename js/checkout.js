@@ -297,7 +297,6 @@ window.Checkout = {
     },
 
     async placeOrder() {
-        console.log('[Checkout] Starting placeOrder...');
         const btn = document.querySelector('button[onclick="placeOrder()"]');
         if (btn) {
             btn.disabled = true;
@@ -317,13 +316,10 @@ window.Checkout = {
                 country: 'India'
             };
 
-            console.log('[Checkout] Shipping Address gathered:', shippingAddress);
-
             shippingAddress.name = `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim();
             const gstNumber = document.getElementById('gstNumber')?.value || '';
             const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
 
-            console.log(`[Checkout] Payment Method: ${paymentMethod}`);
 
             const order = await API.post('/orders', {
                 shippingAddress,
@@ -331,13 +327,10 @@ window.Checkout = {
                 paymentMethod
             });
 
-            console.log('[Checkout] Order Created:', order);
 
             if (paymentMethod === 'cod') {
-                console.log('[Checkout] Handling COD Success...');
                 await this.handleSuccess(order);
             } else {
-                console.log('[Checkout] Initiating Razorpay...');
                 this.initiateRazorpay(order, shippingAddress);
             }
 
@@ -352,15 +345,12 @@ window.Checkout = {
     },
 
     async handleSuccess(order) {
-        console.log('[Checkout] Handling Success for Order:', order.id);
         if (window.UI) UI.showToast('Order Placed! Downloading Invoice...', 'success');
 
         try {
             if (window.UI && UI.downloadInvoice) {
-                console.log('[Checkout] Attempting Invoice Download...');
-                // Wait for download to initiate/complete (it uses fetch so it waits for PDF generation)
+                // Wait for download to initiate/complete
                 await UI.downloadInvoice(order.id);
-                console.log('[Checkout] Invoice Download Action Completed.');
             }
         } catch (e) {
             console.error('[Checkout] Invoice download failed:', e);
@@ -368,9 +358,7 @@ window.Checkout = {
         }
 
         // Give a moment for the browser download prompt to register before redirecting
-        console.log('[Checkout] Scheduling Redirection to Orders page...');
         setTimeout(() => {
-            console.log('[Checkout] Executing Redirection now.');
             // FORCE ABSOLUTE REDIRECT TO ROOT
             window.location.href = '/?page=orders';
         }, 2500);
@@ -398,13 +386,11 @@ window.Checkout = {
             },
             "theme": { "color": "#3399cc" },
             "handler": async function (response) {
-                console.log('[Razorpay] Payment Success Callback:', response);
                 try {
                     await API.post(`/orders/${order.id}/verify-payment`, {
                         paymentId: response.razorpay_payment_id,
-                        signature: response.razorpay_signature // Still sending, but backend ignores it now
+                        signature: response.razorpay_signature
                     });
-                    console.log('[Razorpay] Backend Verification Passed.');
                     Checkout.handleSuccess(order);
                 } catch (e) {
                     console.error('[Razorpay] Verification API Failed:', e);

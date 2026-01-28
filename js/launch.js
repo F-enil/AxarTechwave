@@ -80,11 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 6000);
     };
 
-    // 3. Event Listener
+    // 3. Event Listener (Admin Secret Trigger Only)
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            console.log('[Launch] Enter detected.');
-            if (overlay && overlay.style.display !== 'none' || true) { // Always allow trigger for now
+        if (e.key === 'Enter' && e.ctrlKey && e.shiftKey) { // Require Ctrl+Shift+Enter to prevent accidents
+            if (overlay) {
                 launchWebsite();
             }
         }

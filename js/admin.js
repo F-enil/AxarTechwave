@@ -1009,7 +1009,7 @@ window.Admin = {
             };
 
             // DEBUG: Log the full payload
-            console.log('Sending Payload:', data);
+
 
             if (id) {
                 await API.put(`/catalog/products/${id}`, data);
@@ -1442,7 +1442,7 @@ window.Admin = {
             console.error(error);
             Admin.showToast('Upload failed: ' + error.message, 'error');
             urlInput.value = originalText;
-            imgPreview.src = originalText || 'https://via.placeholder.com/40';
+            imgPreview.src = originalText || 'https://placehold.co/40';
             imgPreview.style.opacity = '1';
         } finally {
             urlInput.disabled = false;
@@ -1453,7 +1453,7 @@ window.Admin = {
         return `
             <div class="flex items-center gap-2 banner-row bg-gray-50 p-2 rounded border">
                  <div class="w-10 h-10 bg-gray-200 rounded flex-shrink-0 overflow-hidden relative group">
-                    <img src="${banner.imageUrl}" onerror="this.src='https://via.placeholder.com/40'" class="w-full h-full object-cover">
+                    <img src="${banner.imageUrl}" onerror="this.src='https://placehold.co/40'" class="w-full h-full object-cover">
                  </div>
                  <div class="flex-1 flex flex-col gap-1">
                     <input type="text" name="bannerUrl" value="${banner.imageUrl}" class="w-full p-1.5 border rounded text-xs bg-white" placeholder="Image URL or Upload -->">

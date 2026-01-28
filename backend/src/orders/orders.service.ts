@@ -109,7 +109,7 @@ export class OrdersService {
             };
 
             const customId = this.orderIdService.generateOrderId();
-            console.log('[CreateOrder] Generated Custom ID:', customId); // DEBUG LOG
+
 
 
             const newOrder = await tx.order.create({
@@ -399,7 +399,13 @@ export class OrdersService {
 
     async verifyPayment(orderId: number, paymentId: string, signature: string) {
         const secret = process.env.RAZORPAY_KEY_SECRET;
-        if (!secret) throw new Error('Razorpay Secret is missing in backend (.env)');
+        if (!secret) {
+            console.error('[OrdersService] RAZORPAY_KEY_SECRET is missing in process.env!');
+            // Return a safe error that doesn't crash 500 but tells us what's wrong (if we can see message)
+            // Or better, throw a specific error the frontend can show?
+            // "Internal Server Error" masks this. Let's throw a BadRequestException-like error if possible.
+            throw new Error('CONFIG_ERROR: Razorpay Secret is missing on Server');
+        }
 
         // Skip manual signature check as we are using standard checkout without RZP Order ID
         // The API fetch below is authoritative.
@@ -421,10 +427,10 @@ export class OrdersService {
             // 2. Check Status
             // status can be 'authorized' (if auto-capture pending) or 'captured' (if success)
             if (payment.status === 'authorized') {
-                console.log(`[Payment] Status is authorized. Attempting auto-capture...`);
+
                 try {
                     const captureResponse = await instance.payments.capture(paymentId, payment.amount, payment.currency);
-                    console.log(`[Payment] Auto-captured successfully:`, captureResponse.id);
+
                     payment.status = 'captured'; // Treat as captured
                 } catch (captureError) {
                     console.error(`[Payment] Auto-capture failed: ${captureError.message}`);
@@ -438,7 +444,7 @@ export class OrdersService {
             }
 
             if (payment.status === 'captured') {
-                console.log(`[Payment] Verified via API: Status is ${payment.status}`);
+
 
                 // 3. Mark Order as Paid
                 await this.prisma.order.update({
@@ -541,11 +547,11 @@ export class OrdersService {
         }
 
         if (order.status === 'paid') {
-            console.log(`[Webhook] Order ${order.id} already paid. Skipping.`);
+
             return;
         }
 
-        console.log(`[Webhook] Marking Order ${order.id} as PAID`);
+
 
         await this.prisma.$transaction([
             this.prisma.order.update({

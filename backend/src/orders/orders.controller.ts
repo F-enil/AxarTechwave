@@ -34,7 +34,7 @@ export class OrdersController {
     @UseGuards(AdminGuard)
     @Get('admin/download-csv-v3')
     async exportOrders(@Res() res: Response) {
-        console.log('!!! CONTROLLER REACHED - EXPORT ENDPOINT !!!');
+
         const csv = await this.ordersService.exportOrders();
         res.header('Content-Type', 'text/csv');
         res.header('Content-Disposition', 'attachment; filename="orders_v2.csv"');

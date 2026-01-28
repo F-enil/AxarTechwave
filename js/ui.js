@@ -34,7 +34,7 @@ const UI = {
 
                 const itemsHtml = order.items.map(item => `
                     <div class="flex items-center gap-4 mt-4 bg-gray-50 p-3 rounded">
-                        <img src="${item.variant.product.media?.[0]?.url || 'https://via.placeholder.com/80'}" class="w-16 h-16 object-cover rounded bg-white border">
+                        <img src="${item.variant.product.media?.[0]?.url || 'https://placehold.co/80'}" class="w-16 h-16 object-cover rounded bg-white border">
                         <div class="flex-1">
                             <h5 class="font-bold text-gray-900">${item.title}</h5>
                             <p class="text-xs text-gray-500">Qty: ${item.quantity} | SKU: ${item.sku || 'N/A'}</p>
@@ -430,7 +430,8 @@ const UI = {
 
         if (!container) return;
 
-        console.log('%c[Shop Debug] Rendering Products:', 'color: orange', this.state.products.length, this.state.products);
+        if (!container) return;
+
 
         if (this.state.products.length === 0) {
             const hasFilters = this.state.filters.categories.length > 0 || this.state.filters.brands.length > 0 || this.state.filters.priceRange;
@@ -452,7 +453,6 @@ const UI = {
         const end = start + this.state.itemsPerPage;
         const paginatedProducts = this.state.products.slice(start, end);
 
-        console.log('[Shop Debug] Paginated Slice:', paginatedProducts);
 
         // Grid vs List View Classes
         if (this.state.view === 'list') {
@@ -468,7 +468,6 @@ const UI = {
             return this.renderProductCard(product);
         }).join('');
 
-        console.log('[Shop Debug] Generated HTML Length:', html.length);
         container.innerHTML = html;
 
         this.renderPagination(this.state.products.length);
@@ -508,7 +507,7 @@ const UI = {
     renderProductListItem(product) {
         const variant = product.variants[0];
         const price = variant.prices[0]?.basePrice || 'N/A';
-        const image = product.media && product.media.length > 0 ? (product.media[0].url || product.media[0].s3Key) : 'https://via.placeholder.com/150';
+        const image = product.media && product.media.length > 0 ? (product.media[0].url || product.media[0].s3Key) : 'https://placehold.co/150';
 
         const stock = variant.stock !== undefined ? Number(variant.stock) : undefined;
         const isOutOfStock = product.status !== 'active' || variant.status !== 'active' || (stock !== undefined && stock <= 0);
@@ -561,7 +560,7 @@ const UI = {
         const price = variant.prices[0]?.basePrice || 'N/A';
         const image = product.media && product.media.length > 0
             ? (product.media[0].url || product.media[0].s3Key)
-            : 'https://via.placeholder.com/300x300?text=No+Image';
+            : 'https://placehold.co/300x300?text=No+Image';
 
         const stock = variant.stock !== undefined ? Number(variant.stock) : undefined;
         const isOutOfStock = product.status !== 'active' || variant.status !== 'active' || (stock !== undefined && stock <= 0);
@@ -781,7 +780,7 @@ const UI = {
         let slidesHtml = '';
         const media = (product.media && product.media.length > 0)
             ? product.media
-            : [{ url: 'https://via.placeholder.com/600x600?text=No+Image', kind: 'image' }];
+            : [{ url: 'https://placehold.co/600x600?text=No+Image', kind: 'image' }];
 
         media.forEach(m => {
             const src = m.url || m.s3Key; // Handle both full URL or key if signed elsewhere (assuming full url here)
@@ -1328,7 +1327,7 @@ const UI = {
                 const product = item;
                 if (!product) return '';
 
-                const image = product.image || 'https://via.placeholder.com/150';
+                const image = product.image || 'https://placehold.co/150';
                 const price = product.price || 0;
 
                 return `
@@ -1453,27 +1452,23 @@ const UI = {
                 activeBanners = settings.banners.filter(b => b.active !== false);
             }
 
-            console.log('%c[Banner Debug] Active Banners:', 'background: #222; color: #bada55', activeBanners.length, activeBanners);
-
             const swiperSection = document.querySelector('.custom-swiper-hero');
             const defaultHero = document.getElementById('default-hero');
             const bannerWrapper = document.getElementById('banner-wrapper'); // Re-select to be sure
 
             if (activeBanners.length === 0) {
                 // No banners -> Show Static Default Hero
-                console.log('[Banner Debug] Switching to Default Hero');
                 if (swiperSection) swiperSection.classList.add('hidden');
                 if (defaultHero) defaultHero.classList.remove('hidden');
             } else {
                 // Has banners -> Show Swiper
-                console.log('[Banner Debug] Switching to Swiper');
                 if (swiperSection) swiperSection.classList.remove('hidden');
                 if (defaultHero) defaultHero.classList.add('hidden');
 
                 if (bannerWrapper) {
                     bannerWrapper.innerHTML = activeBanners.map(b => `
                         <div class="swiper-slide">
-                            <img src="${b.imageUrl}" onerror="this.src='https://via.placeholder.com/1200x400?text=Axar+TechWave'" class="w-full h-full object-cover rounded-2xl" alt="Banner">
+                            <img src="${b.imageUrl}" onerror="this.src='https://placehold.co/1200x400?text=Axar+TechWave'" class="w-full h-full object-cover rounded-2xl" alt="Banner">
                         </div>
                     `).join('');
                 }
@@ -1481,7 +1476,7 @@ const UI = {
                 // Initialize Swiper (Main)
                 if (window.Swiper) {
                     new Swiper(".mySwiper", {
-                        loop: true,
+                        loop: activeBanners.length > 1,
                         autoplay: {
                             delay: 5000,
                             disableOnInteraction: false,
@@ -1766,7 +1761,7 @@ const UI = {
                 cartItemsContainer.innerHTML = cart.items.map(item => {
                     const image = item.variant.product.media?.[0]?.url
                         || item.variant.product.media?.[0]?.s3Key
-                        || 'https://via.placeholder.com/150';
+                        || 'https://placehold.co/150';
 
                     return `
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-4 rounded-lg shadow-sm gap-4">
