@@ -1073,9 +1073,11 @@ const UI = {
     },
 
     async downloadInvoice(orderId) {
+        console.log(`[UI] Downloading invoice for Order ${orderId}`);
         try {
-            // Using fetch directly to handle blob
             const token = localStorage.getItem('access_token');
+            if (!token) throw new Error('User not authenticated');
+
             const response = await fetch(`${CONFIG.API_URL}/orders/${orderId}/invoice`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -1083,24 +1085,34 @@ const UI = {
             });
 
             if (!response.ok) {
-                const errText = await response.text();
-                let errMsg = 'Failed to generate invoice';
-                try { errMsg = JSON.parse(errText).message; } catch (e) { errMsg = errText; }
-                throw new Error(errMsg);
+                const text = await response.text();
+                console.error('[UI] Invoice Fetch Failed:', text);
+                throw new Error(text || 'Failed to fetch invoice');
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
             a.download = `Invoice_${orderId}.pdf`;
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
+
+            // Cleanup
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                console.log('[UI] Invoice download cleanup done.');
+            }, 1000);
+
         } catch (error) {
-            console.error(error);
-            this.showToast(error.message || 'Could not download invoice', 'error');
+            console.error('[UI] Invoice Error:', error);
+            this.showToast('Error downloading invoice. trying fallback...', 'warning');
+            // Fallback: Open in new tab
+            const token = localStorage.getItem('access_token');
+            const fallbackUrl = `${CONFIG.API_URL}/orders/${orderId}/invoice?token=${token}`;
+            window.open(fallbackUrl, '_blank');
         }
     },
 

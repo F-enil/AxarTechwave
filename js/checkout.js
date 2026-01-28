@@ -297,6 +297,7 @@ window.Checkout = {
     },
 
     async placeOrder() {
+        console.log('[Checkout] Starting placeOrder...');
         const btn = document.querySelector('button[onclick="placeOrder()"]');
         if (btn) {
             btn.disabled = true;
@@ -316,9 +317,13 @@ window.Checkout = {
                 country: 'India'
             };
 
+            console.log('[Checkout] Shipping Address gathered:', shippingAddress);
+
             shippingAddress.name = `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim();
             const gstNumber = document.getElementById('gstNumber')?.value || '';
             const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
+
+            console.log(`[Checkout] Payment Method: ${paymentMethod}`);
 
             const order = await API.post('/orders', {
                 shippingAddress,
@@ -326,9 +331,13 @@ window.Checkout = {
                 paymentMethod
             });
 
+            console.log('[Checkout] Order Created:', order);
+
             if (paymentMethod === 'cod') {
-                this.handleSuccess(order);
+                console.log('[Checkout] Handling COD Success...');
+                await this.handleSuccess(order);
             } else {
+                console.log('[Checkout] Initiating Razorpay...');
                 this.initiateRazorpay(order, shippingAddress);
             }
 
@@ -343,32 +352,33 @@ window.Checkout = {
     },
 
     async handleSuccess(order) {
+        console.log('[Checkout] Handling Success for Order:', order.id);
         if (window.UI) UI.showToast('Order Placed! Downloading Invoice...', 'success');
 
         try {
             if (window.UI && UI.downloadInvoice) {
+                console.log('[Checkout] Attempting Invoice Download...');
                 // Wait for download to initiate/complete (it uses fetch so it waits for PDF generation)
                 await UI.downloadInvoice(order.id);
+                console.log('[Checkout] Invoice Download Action Completed.');
             }
         } catch (e) {
-            console.log('Invoice download failed:', e);
+            console.error('[Checkout] Invoice download failed:', e);
             if (window.UI) UI.showToast('Invoice download failed, but order is safe.', 'warning');
         }
 
         // Give a moment for the browser download prompt to register before redirecting
+        console.log('[Checkout] Scheduling Redirection to Orders page...');
         setTimeout(() => {
-            if (window.UI && UI.showPage) {
-                UI.showPage('orders');
-                // Refresh orders to show the new one
-                if (UI.loadOrderHistory) UI.loadOrderHistory();
-            } else {
-                window.location.href = '/?page=orders';
-            }
-        }, 2000);
+            console.log('[Checkout] Executing Redirection now.');
+            // FORCE ABSOLUTE REDIRECT TO ROOT
+            window.location.href = '/?page=orders';
+        }, 2500);
     },
 
     initiateRazorpay(order, userDetails) {
         if (!window.Razorpay) {
+            console.error('[Checkout] Razorpay SDK not found!');
             alert('Payment gateway failed to load. Please try COD.');
             window.location.reload();
             return;
@@ -388,25 +398,34 @@ window.Checkout = {
             },
             "theme": { "color": "#3399cc" },
             "handler": async function (response) {
+                console.log('[Razorpay] Payment Success Callback:', response);
                 try {
                     await API.post(`/orders/${order.id}/verify-payment`, {
                         paymentId: response.razorpay_payment_id,
-                        signature: response.razorpay_signature
+                        signature: response.razorpay_signature // Still sending, but backend ignores it now
                     });
+                    console.log('[Razorpay] Backend Verification Passed.');
                     Checkout.handleSuccess(order);
                 } catch (e) {
-                    if (window.UI) UI.showToast('Payment Verification Failed', 'error');
-                    window.location.href = '/?page=orders';
+                    console.error('[Razorpay] Verification API Failed:', e);
+                    if (window.UI) UI.showToast('Payment Verification Failed: ' + e.message, 'error');
+                    // Even if verification fails, redirect to orders so they can see status
+                    setTimeout(() => window.location.href = '/?page=orders', 2000);
                 }
             },
             "modal": {
                 "ondismiss": function () {
+                    console.log('[Razorpay] Payment Cancelled by User');
                     if (window.UI) UI.showToast('Payment Cancelled', 'info');
                 }
             }
         };
 
         const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+            console.error('[Razorpay] Payment Failed Event:', response.error);
+            if (window.UI) UI.showToast(`Payment Failed: ${response.error.description}`, 'error');
+        });
         rzp.open();
     }
 };
