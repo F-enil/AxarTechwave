@@ -81,12 +81,11 @@
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
         <!-- Tailwind CSS -->
-        <script src="https://cdn.tailwindcss.com"></script>
         <script>
-            // Suppress Tailwind CDN production warning
-            tailwind.config = { theme: { extend: {} } };
-            console.warn = (function (fn) { return function (msg) { if (msg.includes('tailwindcss')) return; return fn.apply(console, arguments); } })(console.warn);
+            // Suppress Tailwind CDN production warning (Must be before script load)
+            console.warn = (function (fn) { return function (msg) { if (msg && msg.includes && msg.includes('tailwindcss')) return; return fn.apply(console, arguments); } })(console.warn);
         </script>
+        <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
                 theme: {
