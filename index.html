@@ -268,7 +268,6 @@
                 background: white;
                 padding: 2rem;
                 border-radius: 12px;
-                max-width: 400px;
                 width: 90%;
                 animation: slideInUp 0.3s ease;
             }
@@ -1712,7 +1711,7 @@
 
 
         <div id="login-modal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content max-w-md">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-heading text-2xl font-bold text-primary">Account</h3>
                     <button onclick="closeLoginModal()"
@@ -1978,7 +1977,7 @@
             <!-- Notification -->
             <!-- Moved Address Modal Here for Z-Index Fix -->
             <div id="address-modal" class="modal" style="z-index: 10001 !important;">
-                <div class="modal-content">
+                <div class="modal-content max-w-md">
                     <div class="flex justify-between items-center mb-6">
                         <h3 id="address-modal-title" class="font-heading text-2xl font-bold text-primary">Add Address
                         </h3>
@@ -2049,7 +2048,7 @@
 
             <!-- Return Modal -->
             <div id="return-modal" class="modal">
-                <div class="modal-content">
+                <div class="modal-content max-w-md">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-heading text-xl font-bold text-primary">Request Return/Exchange</h3>
                         <button onclick="document.getElementById('return-modal').classList.remove('show')"
