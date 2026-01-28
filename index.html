@@ -1800,249 +1800,300 @@
 
         <!-- Profile Modal -->
         <div id="profile-modal" class="modal">
-            <div class="modal-content max-w-2xl">
-                <div class="flex justify-between items-center mb-6">
+            <div class="modal-content w-full max-w-5xl rounded-2xl h-[90vh] md:h-auto flex flex-col md:block">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6 pl-1 pr-1">
                     <h3 class="font-heading text-2xl font-bold text-primary">My Account</h3>
                     <button onclick="UI.closeProfileModal()"
-                        class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                        class="text-gray-500 hover:text-gray-700 text-3xl font-light">&times;</button>
                 </div>
 
-                <div class="flex border-b mb-6 overflow-x-auto">
-                    <button onclick="UI.showProfileTab('profile')" id="tab-btn-profile"
-                        class="py-2 px-4 border-b-2 border-primary text-primary font-medium whitespace-nowrap">Profile</button>
-                    <button onclick="UI.showProfileTab('addresses')" id="tab-btn-addresses"
-                        class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-primary whitespace-nowrap">Addresses</button>
-                    <button onclick="UI.showProfileTab('orders')" id="tab-btn-orders"
-                        class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-primary whitespace-nowrap">Orders</button>
-                    <button onclick="UI.showProfileTab('wishlist')" id="tab-btn-wishlist"
-                        class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-primary whitespace-nowrap">Wishlist</button>
-                </div>
+                <!-- Main Layout -->
+                <div class="flex flex-col md:flex-row gap-0 md:gap-8 flex-1 overflow-hidden md:overflow-visible">
 
-                <!-- Profile Tab -->
-                <div id="tab-content-profile">
-                    <form id="profile-form" class="space-y-4 mb-8" onsubmit="UI.handleProfileUpdate(event)">
-                        <h4 class="font-bold text-lg mb-4">Personal Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                                <input type="text" name="username"
-                                    class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input type="email" name="email"
-                                    class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-primary px-6 py-2 rounded-lg text-sm">Update Profile</button>
-                    </form>
-
-                    <form id="password-form" class="space-y-4 pt-6 border-t" onsubmit="UI.handleChangePassword(event)">
-                        <h4 class="font-bold text-lg mb-4">Change Password</h4>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                                <input type="password" name="password"
-                                    class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary"
-                                    required>
-                            </div>
-                            <button type="submit" class="btn-secondary px-6 py-2 rounded-lg text-sm">Change
-                                Password</button>
-                        </div>
-                    </form>
-
-                    <div class="mt-8 pt-6 border-t">
-                        <button onclick="UI.logout()"
-                            class="text-red-600 hover:text-red-800 font-medium flex items-center">
-                            <span class="mr-2">🚪</span> Logout
+                    <!-- Sidebar Tabs (Mobile: Horizontal Scroll | Desktop: Vertical Sidebar) -->
+                    <div
+                        class="flex flex-row md:flex-col border-b md:border-b-0 md:border-r border-gray-200 
+                                overflow-x-auto md:overflow-visible flex-shrink-0 md:w-64 gap-2 md:gap-1 pb-3 md:pb-0 md:pr-4">
+                        <button onclick="UI.showProfileTab('profile')" id="tab-btn-profile" class="py-2.5 px-4 rounded-lg text-left text-sm font-medium transition-colors whitespace-nowrap
+                                   md:w-full hover:bg-gray-50 text-gray-600 flex-shrink-0">
+                            👤 Profile
+                        </button>
+                        <button onclick="UI.showProfileTab('addresses')" id="tab-btn-addresses" class="py-2.5 px-4 rounded-lg text-left text-sm font-medium transition-colors whitespace-nowrap
+                                   md:w-full hover:bg-gray-50 text-gray-600 flex-shrink-0">
+                            📍 Addresses
+                        </button>
+                        <button onclick="UI.showProfileTab('orders')" id="tab-btn-orders" class="py-2.5 px-4 rounded-lg text-left text-sm font-medium transition-colors whitespace-nowrap
+                                   md:w-full hover:bg-gray-50 text-gray-600 flex-shrink-0">
+                            📦 Orders
+                        </button>
+                        <button onclick="UI.showProfileTab('wishlist')" id="tab-btn-wishlist" class="py-2.5 px-4 rounded-lg text-left text-sm font-medium transition-colors whitespace-nowrap
+                                   md:w-full hover:bg-gray-50 text-gray-600 flex-shrink-0">
+                            ❤️ Wishlist
+                        </button>
+                        <button onclick="UI.logout()" class="py-2.5 px-4 rounded-lg text-left text-sm font-medium transition-colors whitespace-nowrap
+                                   md:w-full text-red-600 hover:bg-red-50 mt-auto hidden md:block">
+                            🚪 Logout
                         </button>
                     </div>
-                </div>
 
-                <!-- Addresses Tab -->
-                <div id="tab-content-addresses" class="hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-lg">Saved Addresses</h4>
-                        <button onclick="UI.showAddAddressModal()"
-                            class="text-primary text-sm font-bold hover:underline">+
-                            Add New</button>
-                    </div>
-                    <div id="profile-address-list" class="space-y-4 max-h-[400px] overflow-y-auto">
-                        <!-- Loaded dynamically -->
-                    </div>
-                    <!-- Simple Inline Add Address Form (Hidden by default) -->
-                    <form id="add-address-form" class="hidden mt-4 space-y-3 border p-4 rounded bg-gray-50"
-                        onsubmit="UI.handleAddAddress(event)">
-                        <input type="text" name="line1" placeholder="Address Line 1" required
-                            class="w-full border p-2 rounded">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" name="city" placeholder="City" required
-                                class="w-full border p-2 rounded">
-                            <input type="text" name="state" placeholder="State" required
-                                class="w-full border p-2 rounded">
+                    <!-- Content Area -->
+                    <div class="flex-1 overflow-y-auto md:overflow-visible p-1 custom-scrollbar">
+
+                        <!-- Profile Tab -->
+                        <div id="tab-content-profile">
+                            <form id="profile-form" class="space-y-5 bg-white p-1"
+                                onsubmit="UI.handleProfileUpdate(event)">
+                                <h4 class="font-bold text-lg border-b pb-2 mb-4">Personal Details</h4>
+                                <div class="grid grid-cols-1 gap-5">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                        <input type="text" name="username" readonly
+                                            class="w-full px-4 py-2 border rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed text-sm">
+                                        <p class="text-xs text-gray-400 mt-1">Username cannot be changed.</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email
+                                            Address</label>
+                                        <input type="email" name="email"
+                                            class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary text-sm">
+                                    </div>
+                                    <button type="submit"
+                                        class="self-start bg-primary text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-colors">
+                                        Update Details
+                                    </button>
+                                </div>
+                            </form>
+
+                            <form id="password-form" class="space-y-5 mt-8 pt-8 border-t border-gray-100"
+                                onsubmit="UI.handleChangePassword(event)">
+                                <h4 class="font-bold text-lg border-b pb-2 mb-4">Security</h4>
+                                <div class="space-y-4 max-w-md">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                        <input type="password" name="password" placeholder="Min. 6 characters"
+                                            class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary text-sm"
+                                            required>
+                                    </div>
+                                    <button type="submit"
+                                        class="bg-gray-800 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors">
+                                        Change Password
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Mobile Logout -->
+                            <button onclick="UI.logout()"
+                                class="w-full mt-8 py-3 text-red-600 font-medium border border-red-200 rounded-lg md:hidden">
+                                Logout
+                            </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" name="country" placeholder="Country" required
-                                class="w-full border p-2 rounded">
-                            <input type="text" name="pincode" placeholder="PIN Code" required
-                                class="w-full border p-2 rounded">
+
+                        <!-- Addresses Tab -->
+                        <div id="tab-content-addresses" class="hidden">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-bold text-lg">Saved Addresses</h4>
+                                <button onclick="UI.showAddAddressModal()"
+                                    class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary shadow-sm">
+                                    + Add New
+                                </button>
+                            </div>
+                            <div id="profile-address-list"
+                                class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Loaded dynamically -->
+                            </div>
+
+                            <!-- Inline Add Form -->
+                            <form id="add-address-form"
+                                class="hidden mt-6 space-y-4 border border-gray-200 p-6 rounded-xl bg-gray-50 shadow-inner"
+                                onsubmit="UI.handleAddAddress(event)">
+                                <h5 class="font-bold text-gray-800 mb-2">New Address</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" name="name" placeholder="Full Name" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                    <input type="tel" name="phone" placeholder="Phone Number" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                </div>
+                                <input type="text" name="line1" placeholder="Address Line 1" required
+                                    class="w-full border p-2.5 rounded-lg text-sm">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="text" name="city" placeholder="City" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                    <input type="text" name="state" placeholder="State" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="text" name="country" placeholder="India" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                    <input type="text" name="pincode" placeholder="PIN Code" required
+                                        class="w-full border p-2.5 rounded-lg text-sm">
+                                </div>
+
+                                <div class="flex items-center justify-between pt-2">
+                                    <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="isDefault"
+                                            class="rounded text-primary focus:ring-primary"> <span>Set as default</span>
+                                    </label>
+                                    <div class="flex space-x-3">
+                                        <button type="button"
+                                            onclick="document.getElementById('add-address-form').classList.add('hidden')"
+                                            class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                                        <button type="submit"
+                                            class="bg-primary text-white px-6 py-2 rounded-lg text-sm shadow-sm hover:bg-secondary">Save
+                                            Address</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <input type="tel" name="phone" placeholder="Phone Number" required
-                            class="w-full border p-2 rounded">
-                        <label class="flex items-center space-x-2 text-sm">
-                            <input type="checkbox" name="isDefault"> <span>Set as default</span>
+
+                        <!-- Orders Tab -->
+                        <div id="tab-content-orders" class="hidden">
+                            <h4 class="font-bold text-lg mb-6 sticky top-0 bg-white z-10 py-2">Order History</h4>
+                            <div id="profile-orders-list"
+                                class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Wishlist Tab -->
+                        <div id="tab-content-wishlist" class="hidden">
+                            <h4 class="font-bold text-lg mb-6 sticky top-0 bg-white z-10 py-2">My Wishlist</h4>
+                            <div id="profile-wishlist-list"
+                                class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Loaded dynamically -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <a href="https://wa.me/918849491216" target="_blank"
+                class="whatsapp-float bg-green-500 hover:bg-green-600 transition-colors" aria-label="Chat on WhatsApp">
+                <svg class="w-8 h-8 fill-current text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                </svg>
+            </a>
+
+            <!-- Notification -->
+            <!-- Moved Address Modal Here for Z-Index Fix -->
+            <div id="address-modal" class="modal" style="z-index: 10001 !important;">
+                <div class="modal-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="address-modal-title" class="font-heading text-2xl font-bold text-primary">Add Address
+                        </h3>
+                        <button onclick="UI.closeAddressModal()"
+                            class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    <form id="address-form" class="space-y-4" onsubmit="UI.handleAddressSubmit(event)">
+                        <input type="hidden" name="id">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" name="name" placeholder="Full Name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                            <input type="tel" name="phone" placeholder="Phone Number"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                        </div>
+                        <input type="text" name="line1" placeholder="Address Line 1"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            required>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" name="city" placeholder="City"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                            <input type="text" name="state" placeholder="State"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" name="country" placeholder="Country"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                            <input type="text" name="pincode" placeholder="PIN Code"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                required>
+                        </div>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="isDefault"
+                                class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            <span>Set as Default Address</span>
                         </label>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded text-sm">Save</button>
+                        <button type="submit" class="btn-primary w-full py-3 rounded-lg">Save Address</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="notification" class="notification">
+                <span id="notification-text"></span>
+            </div>
+
+
+
+
+
+            <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'974c3fca90a5415e',t:'MTc1NjEzNzA3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+            <!-- Backend Integration Scripts -->
+            <script src="js/config.js?v=0.1"></script>
+            <script src="js/api.js?v=0.1"></script>
+            <script src="js/ui.js?v=0.2"></script>
+            <script src="js/auth.js?v=0.1"></script>
+            <script src="js/cart.js?v=0.1"></script>
+            <script src="js/checkout.js?v=0.1"></script>
+            <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+            <script src="js/admin.js?v=0.1"></script>
+
+            <script>
+                // Inline overrides removed. Using centralized UI.js logic.
+            </script>
+
+            <!-- Return Modal -->
+            <div id="return-modal" class="modal">
+                <div class="modal-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-heading text-xl font-bold text-primary">Request Return/Exchange</h3>
+                        <button onclick="document.getElementById('return-modal').classList.remove('show')"
+                            class="text-gray-500 hover:text-gray-700">✕</button>
+                    </div>
+                    <form onsubmit="UI.submitReturnRequest(event)" class="space-y-4">
+                        <input type="hidden" name="orderId" id="return-order-id">
+                        <input type="hidden" name="variantId" id="return-variant-id">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Return Type</label>
+                            <select name="type" class="w-full border rounded p-2" required>
+                                <option value="refund">Refund Request</option>
+                                <option value="exchange">Exchange Request</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                            <textarea name="reason" rows="3" class="w-full border rounded p-2"
+                                placeholder="Why are you returning this item?" required></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Upload Images (Optional)</label>
+                            <input type="text" name="images"
+                                class="w-full border rounded p-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                placeholder="Paste image URLs from clipboard or cloud (comma separated)">
+                            <p class="text-xs text-gray-400 mt-1">Direct upload not supported in demo. Use external
+                                links.
+                            </p>
+                        </div>
+
+                        <div class="flex space-x-4 pt-4">
                             <button type="button"
-                                onclick="document.getElementById('add-address-form').classList.add('hidden')"
-                                class="text-gray-500 text-sm">Cancel</button>
+                                onclick="document.getElementById('return-modal').classList.remove('show')"
+                                class="flex-1 py-2 border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+                            <button type="submit"
+                                class="flex-1 py-2 bg-primary text-white rounded hover:bg-opacity-90">Submit
+                                Request</button>
                         </div>
                     </form>
                 </div>
-
-                <!-- Orders Tab -->
-                <div id="tab-content-orders" class="hidden">
-                    <h4 class="font-bold text-lg mb-4">Order History</h4>
-                    <div id="profile-orders-list" class="space-y-4 max-h-[400px] overflow-y-auto">
-                        <!-- Loaded dynamically -->
-                    </div>
-                </div>
-
-                <!-- Wishlist Tab -->
-                <div id="tab-content-wishlist" class="hidden">
-                    <h4 class="font-bold text-lg mb-4">My Wishlist</h4>
-                    <div id="profile-wishlist-list" class="space-y-4 max-h-[400px] overflow-y-auto">
-                        <!-- Loaded dynamically -->
-                    </div>
-                </div>
-
             </div>
-        </div>
-        <a href="https://wa.me/918849491216" target="_blank"
-            class="whatsapp-float bg-green-500 hover:bg-green-600 transition-colors" aria-label="Chat on WhatsApp">
-            <svg class="w-8 h-8 fill-current text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-            </svg>
-        </a>
-
-        <!-- Notification -->
-        <!-- Moved Address Modal Here for Z-Index Fix -->
-        <div id="address-modal" class="modal" style="z-index: 10001 !important;">
-            <div class="modal-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="address-modal-title" class="font-heading text-2xl font-bold text-primary">Add Address</h3>
-                    <button onclick="UI.closeAddressModal()"
-                        class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                </div>
-                <form id="address-form" class="space-y-4" onsubmit="UI.handleAddressSubmit(event)">
-                    <input type="hidden" name="id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" name="name" placeholder="Full Name"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                        <input type="tel" name="phone" placeholder="Phone Number"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                    </div>
-                    <input type="text" name="line1" placeholder="Address Line 1"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        required>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" name="city" placeholder="City"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                        <input type="text" name="state" placeholder="State"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" name="country" placeholder="Country"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                        <input type="text" name="pincode" placeholder="PIN Code"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            required>
-                    </div>
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" name="isDefault"
-                            class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
-                        <span>Set as Default Address</span>
-                    </label>
-                    <button type="submit" class="btn-primary w-full py-3 rounded-lg">Save Address</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="notification" class="notification">
-            <span id="notification-text"></span>
-        </div>
-
-
-
-
-
-        <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'974c3fca90a5415e',t:'MTc1NjEzNzA3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
-        <!-- Backend Integration Scripts -->
-        <script src="js/config.js?v=0.1"></script>
-        <script src="js/api.js?v=0.1"></script>
-        <script src="js/ui.js?v=0.2"></script>
-        <script src="js/auth.js?v=0.1"></script>
-        <script src="js/cart.js?v=0.1"></script>
-        <script src="js/checkout.js?v=0.1"></script>
-        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-        <script src="js/admin.js?v=0.1"></script>
-
-        <script>
-            // Inline overrides removed. Using centralized UI.js logic.
-        </script>
-
-        <!-- Return Modal -->
-        <div id="return-modal" class="modal">
-            <div class="modal-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-heading text-xl font-bold text-primary">Request Return/Exchange</h3>
-                    <button onclick="document.getElementById('return-modal').classList.remove('show')"
-                        class="text-gray-500 hover:text-gray-700">✕</button>
-                </div>
-                <form onsubmit="UI.submitReturnRequest(event)" class="space-y-4">
-                    <input type="hidden" name="orderId" id="return-order-id">
-                    <input type="hidden" name="variantId" id="return-variant-id">
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Return Type</label>
-                        <select name="type" class="w-full border rounded p-2" required>
-                            <option value="refund">Refund Request</option>
-                            <option value="exchange">Exchange Request</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                        <textarea name="reason" rows="3" class="w-full border rounded p-2"
-                            placeholder="Why are you returning this item?" required></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Upload Images (Optional)</label>
-                        <input type="text" name="images"
-                            class="w-full border rounded p-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            placeholder="Paste image URLs from clipboard or cloud (comma separated)">
-                        <p class="text-xs text-gray-400 mt-1">Direct upload not supported in demo. Use external links.
-                        </p>
-                    </div>
-
-                    <div class="flex space-x-4 pt-4">
-                        <button type="button" onclick="document.getElementById('return-modal').classList.remove('show')"
-                            class="flex-1 py-2 border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
-                        <button type="submit"
-                            class="flex-1 py-2 bg-primary text-white rounded hover:bg-opacity-90">Submit
-                            Request</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
 
 </html>

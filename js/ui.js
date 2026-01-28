@@ -1553,14 +1553,17 @@ const UI = {
         ['profile', 'addresses', 'orders', 'wishlist'].forEach(t => {
             const btn = document.getElementById(`tab-btn-${t}`);
             const content = document.getElementById(`tab-content-${t}`);
+            if (!btn || !content) return; // Safeguard
 
             if (t === tab) {
-                btn.classList.add('border-primary', 'text-primary');
-                btn.classList.remove('border-transparent', 'text-gray-500');
+                // Active State (Works for both Sidebar and Horizontal Tabs)
+                btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                btn.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-primary', 'border-b-2');
                 content.classList.remove('hidden');
             } else {
-                btn.classList.remove('border-primary', 'text-primary');
-                btn.classList.add('border-transparent', 'text-gray-500');
+                // Inactive State
+                btn.classList.remove('bg-primary', 'text-white', 'shadow-sm', 'border-primary', 'border-b-2');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50');
                 content.classList.add('hidden');
             }
         });
