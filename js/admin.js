@@ -57,8 +57,21 @@ window.Admin = {
     },
 
     exitAdmin() {
-        // Simple reload to return to shop state clean
-        window.location.reload();
+        // Seamless Transition (No Reload)
+        document.getElementById('admin-app').classList.add('hidden');
+        document.getElementById('shop-app').classList.remove('hidden');
+
+        // Restore Shop State
+        if (typeof UI !== 'undefined') {
+            UI.showPage('home'); // Go to home or previous state
+            UI.updateCartCount(); // Refresh cart badge
+            UI.loadSiteSettings(); // Re-apply banners/title
+            // Verify Auth State for Header
+            if (Auth.isLoggedIn()) {
+                const user = Auth.getUser();
+                // Update header specific to user if needed (UI.checkAuth usually handles this via observer)
+            }
+        }
     },
 
     currentView: 'dashboard',

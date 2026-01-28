@@ -401,13 +401,8 @@ export class OrdersService {
         const secret = process.env.RAZORPAY_KEY_SECRET;
         if (!secret) throw new Error('Razorpay Secret is missing in backend (.env)');
 
-        // Verify Signature
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const crypto = require('crypto');
-        const generated_signature = crypto
-            .createHmac('sha256', secret)
-            .update(orderId + "|" + paymentId)
-            .digest('hex');
+        // Skip manual signature check as we are using standard checkout without RZP Order ID
+        // The API fetch below is authoritative.
 
         // Initialize Razorpay
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -475,10 +470,10 @@ export class OrdersService {
             // Or fail safe. 
             // Since we have the "Simple Fix" logic before this block (if I remove it), 
             // I should Replace the signature block entirely with this.
-            if (generated_signature !== signature) {
-                // If API check failed AND signature failed -> Reject
-                throw new Error('Payment verification failed');
+            if (error.message && error.message.includes('Invalid Payment ID')) {
+                throw new Error('Payment Verification Failed: Invalid ID');
             }
+            throw new Error(error.message || 'Payment Verification Failed');
             // If signature matched but API failed, we might still proceed or warn?
             // Let's assume API is truth.
             throw error;

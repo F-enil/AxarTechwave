@@ -342,16 +342,29 @@ window.Checkout = {
         }
     },
 
-    handleSuccess(order) {
-        if (window.UI) UI.showToast('Order Placed! Redirecting...', 'success');
+    async handleSuccess(order) {
+        if (window.UI) UI.showToast('Order Placed! Downloading Invoice...', 'success');
 
-        if (window.UI && UI.downloadInvoice) {
-            UI.downloadInvoice(order.id).catch(e => console.log('Invoice download failed:', e));
+        try {
+            if (window.UI && UI.downloadInvoice) {
+                // Wait for download to initiate/complete (it uses fetch so it waits for PDF generation)
+                await UI.downloadInvoice(order.id);
+            }
+        } catch (e) {
+            console.log('Invoice download failed:', e);
+            if (window.UI) UI.showToast('Invoice download failed, but order is safe.', 'warning');
         }
 
+        // Give a moment for the browser download prompt to register before redirecting
         setTimeout(() => {
-            window.location.href = '?page=orders';
-        }, 1500);
+            if (window.UI && UI.showPage) {
+                UI.showPage('orders');
+                // Refresh orders to show the new one
+                if (UI.loadOrderHistory) UI.loadOrderHistory();
+            } else {
+                window.location.href = '/?page=orders';
+            }
+        }, 2000);
     },
 
     initiateRazorpay(order, userDetails) {
@@ -383,7 +396,7 @@ window.Checkout = {
                     Checkout.handleSuccess(order);
                 } catch (e) {
                     if (window.UI) UI.showToast('Payment Verification Failed', 'error');
-                    window.location.href = '?page=orders';
+                    window.location.href = '/?page=orders';
                 }
             },
             "modal": {
