@@ -18,6 +18,7 @@ import { ContactModule } from './contact/contact.module';
 import { CmsModule } from './cms/cms.module';
 import { NotificationModule } from './notifications/notification.module';
 import { RmsModule } from './rms/rms.module';
+import { MerchantModule } from './merchant/merchant.module';
 
 @Module({
     imports: [
@@ -50,7 +51,8 @@ import { RmsModule } from './rms/rms.module';
         ContactModule,
         CmsModule,
         NotificationModule,
-        RmsModule
+        RmsModule,
+        MerchantModule
     ],
     controllers: [],
     providers: [

@@ -574,10 +574,16 @@ window.Admin = {
                         <h2 class="text-2xl font-heading font-bold text-gray-800">Products</h2>
                         <p class="text-sm text-gray-500">Manage your product catalog</p>
                     </div>
-                    <button onclick="Admin.showProductForm()" class="bg-primary text-white px-5 py-2.5 rounded-lg flex items-center space-x-2 hover:bg-opacity-90 transition-all shadow-sm">
-                        <span>+</span>
-                        <span>Add Product</span>
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="Admin.triggerMerchantSync()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg flex items-center space-x-2 hover:bg-gray-50 transition-all font-medium text-sm">
+                            <span class="text-lg">google</span>
+                            <span>Sync Google</span>
+                        </button>
+                        <button onclick="Admin.showProductForm()" class="bg-primary text-white px-5 py-2.5 rounded-lg flex items-center space-x-2 hover:bg-opacity-90 transition-all shadow-sm">
+                            <span>+</span>
+                            <span>Add Product</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -2355,6 +2361,32 @@ window.Admin = {
             kind: file.type.startsWith('video') ? 'video' : 'image',
             url: data.url // Frontend might use this for preview immediately
         };
+    },
+
+    async triggerMerchantSync() {
+        if (!confirm('Start syncing products to Google Merchant Center? This may take a few moments.')) return;
+
+        // Find the button that triggered this
+        const btn = event.currentTarget || document.querySelector('button[onclick="Admin.triggerMerchantSync()"]');
+        let originalText = '';
+        if (btn) {
+            originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin inline-block">↻</span> Syncing...';
+            btn.disabled = true;
+        }
+
+        try {
+            const res = await API.post('/merchant/sync', {});
+            alert('Sync Successful! \nItems Processed: ' + (res.details?.results || 0));
+        } catch (err) {
+            console.error(err);
+            alert('Sync Failed: ' + (err.message || 'Unknown error'));
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
     }
 };
 

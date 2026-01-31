@@ -171,7 +171,52 @@ const UI = {
         checkStatus();
     },
 
-    init() {
+    // --- Dynamic SEO Manager ---
+    updateSEO(title, description, image, canonicalPath) {
+        // 1. Update Title
+        if (title) document.title = title;
+
+        // 2. Update Description
+        if (description) {
+            const descMeta = document.querySelector('meta[name="description"]');
+            if (descMeta) descMeta.setAttribute('content', description);
+            // Also update OG Description
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if (ogDesc) ogDesc.setAttribute('content', description);
+        }
+
+        // 3. Update OG Image
+        if (image) {
+            const ogImage = document.querySelector('meta[property="og:image"]');
+            if (ogImage) ogImage.setAttribute('content', image);
+        }
+
+        // 4. Update Canonical Tag
+        let link = document.querySelector("link[rel='canonical']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'canonical';
+            document.head.appendChild(link);
+        }
+
+        let fullUrl;
+        if (canonicalPath) {
+            // If explicit path provided, use it (handles product params etc)
+            const cleanPath = canonicalPath.startsWith('/') ? canonicalPath : '/' + canonicalPath;
+            fullUrl = `https://www.axartechwave.com${(canonicalPath === 'home' || canonicalPath === '/') ? '' : cleanPath}`;
+        } else {
+            // Fallback: Current window location (strip query params to avoid duplicate issues on static pages)
+            fullUrl = window.location.origin + window.location.pathname;
+        }
+
+        link.href = fullUrl;
+
+        // 5. Update OG URL
+        const ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) ogUrl.setAttribute('content', fullUrl);
+    },
+
+    async init() {
         this.setupAuthObserver();
         // this.loadCart(); // Removed
         if (window.Cart) this.updateCartDisplay();
@@ -196,23 +241,44 @@ const UI = {
 
         // Handle Back/Forward Navigation
         window.addEventListener('popstate', (e) => {
-            const pageId = e.state ? e.state.pageId : (window.location.pathname.substring(1) || 'home');
-            this.showPage(pageId, false);
+            if (e.state && e.state.pageId === 'product' && e.state.productId) {
+                // If going back to a product, ensure we render it
+                this.showProductDetail(e.state.productId);
+            } else {
+                const pageId = e.state ? e.state.pageId : (window.location.pathname.substring(1) || 'home');
+                this.showPage(pageId, false);
+            }
         });
 
         // Handle Initial URL
-        const path = window.location.pathname.substring(1);
-        const queryPage = new URLSearchParams(window.location.search).get('page');
+        let path = window.location.pathname.substring(1);
+        // Remove trailing slash if present
+        if (path.endsWith('/')) path = path.slice(0, -1);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryPage = urlParams.get('page');
+        const productId = urlParams.get('id');
+
         // Prefer path, fallback to query, default to home
         const startPage = path || queryPage || 'home';
 
-        // We pass false to avoid pushing state on initial load (preserving browser history integrity)
-        // But if it was a query param, we might want to "upgrade" it to clean URL? 
-        // For simplicity, just render.
-        this.showPage(startPage, false);
-
         this.updateCartCount();
         this.loadSiteSettings();
+
+        // DEEP LINK LOGIC
+        if (startPage === 'product' && productId) {
+            // We need to fetch products FIRST before showing details
+            await this.loadProducts();
+            this.showProductDetail(parseInt(productId));
+        } else if (startPage === 'shop') {
+            this.showPage('shop', false);
+            // showPage('shop') calls loadProducts internally
+        } else {
+            // For home or others, we might want featured products?
+            // If home, let's load products silently so featured works if logic is added
+            if (startPage === 'home') this.loadProducts();
+            this.showPage(startPage, false);
+        }
     },
 
     setupGlobalHandlers() {
@@ -758,13 +824,19 @@ const UI = {
         const firstImage = product.media?.[0]?.url || product.media?.[0]?.s3Key || 'https://www.axartechwave.com/images/logo.png';
         const seoTitle = `${product.title} - Buy Online | Axar TechWave`;
         const seoDesc = product.description ? product.description.substring(0, 150) + '...' : `Buy ${product.title} at best price in Surat.`;
+        const permalink = `/product?id=${product.id}`;
 
-        this.updateSEO(seoTitle, seoDesc, firstImage);
+        this.updateSEO(seoTitle, seoDesc, firstImage, permalink);
         this.injectProductSchema(product);
         // --- SEO UPDATE END ---
 
         // Switch to Product Detail Page View
-        this.showPage('product');
+        // Update URL to specific product ID so refresh/sharing works better (if supported by load logic)
+        // If your app handles query params on load (it seems to in init lines 230+), this is safe.
+        window.history.pushState({ pageId: 'product', productId: product.id }, '', permalink);
+
+        // Use showPage internal logic to switch views but skip default pushState (since we did it above)
+        this.showPage('product', false);
 
         const container = document.getElementById('product-detail');
         if (!container) return;
@@ -943,10 +1015,10 @@ const UI = {
             window.scrollTo(0, 0);
 
             // --- SEO UPDATE FOR PAGES ---
-            if (pageId === 'home') this.updateSEO('Axar TechWave - Modern Tech, Vibrant Life', 'Best Electronics Store in Surat.', 'https://www.axartechwave.com/images/logo.png');
-            if (pageId === 'shop') this.updateSEO('Shop All Products - Axar TechWave', 'Browse our full collection of mobiles and accessories.', 'https://www.axartechwave.com/images/shop-banner.jpg');
-            if (pageId === 'about') this.updateSEO('About Us - Axar TechWave', 'Learn about our journey and mission.', 'https://www.axartechwave.com/images/about-us.jpg');
-            if (pageId === 'contact') this.updateSEO('Contact Us - Axar TechWave', 'Get in touch for support and inquiries.', 'https://www.axartechwave.com/images/contact.jpg');
+            if (pageId === 'home') this.updateSEO('Axar TechWave - Modern Tech, Vibrant Life', 'Best Electronics Store in Surat.', 'https://www.axartechwave.com/images/logo.png', '/');
+            if (pageId === 'shop') this.updateSEO('Shop All Products - Axar TechWave', 'Browse our full collection of mobiles and accessories.', 'https://www.axartechwave.com/images/shop-banner.jpg', '/shop');
+            if (pageId === 'about') this.updateSEO('About Us - Axar TechWave', 'Learn about our journey and mission.', 'https://www.axartechwave.com/images/about-us.jpg', '/about');
+            if (pageId === 'contact') this.updateSEO('Contact Us - Axar TechWave', 'Get in touch for support and inquiries.', 'https://www.axartechwave.com/images/contact.jpg', '/contact');
             // ---------------------------
         }
 
@@ -983,33 +1055,7 @@ const UI = {
         if (pageId === 'wishlist') this.loadWishlist();
     },
 
-    updateSEO(title, description, image) {
-        if (title) document.title = title;
-        if (description) {
-            const descMeta = document.querySelector('meta[name="description"]');
-            if (descMeta) descMeta.setAttribute('content', description);
-            const ogDesc = document.querySelector('meta[property="og:description"]');
-            if (ogDesc) ogDesc.setAttribute('content', description);
-        }
-        if (image) {
-            const ogImage = document.querySelector('meta[property="og:image"]');
-            if (ogImage) ogImage.setAttribute('content', image);
-        }
 
-        // Update Canonical URL
-        let canonical = document.querySelector('link[rel="canonical"]');
-        if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.setAttribute('rel', 'canonical');
-            document.head.appendChild(canonical);
-        }
-        // Construct clean URL (origin + pathname), ensuring no query params for canonical
-        let cleanUrl = window.location.origin + window.location.pathname;
-        if (cleanUrl.endsWith('/') && cleanUrl !== window.location.origin + '/') {
-            cleanUrl = cleanUrl.slice(0, -1); // Remove trailing slash for subpages if desired, standard is usually with or without.
-        }
-        canonical.setAttribute('href', cleanUrl);
-    },
 
     injectProductSchema(product) {
         const schemaScriptId = 'product-schema-jsonld';
@@ -1553,14 +1599,17 @@ const UI = {
         ['profile', 'addresses', 'orders', 'wishlist'].forEach(t => {
             const btn = document.getElementById(`tab-btn-${t}`);
             const content = document.getElementById(`tab-content-${t}`);
+            if (!btn || !content) return; // Safeguard
 
             if (t === tab) {
-                btn.classList.add('border-primary', 'text-primary');
-                btn.classList.remove('border-transparent', 'text-gray-500');
+                // Active State (Works for both Sidebar and Horizontal Tabs)
+                btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                btn.classList.remove('text-gray-600', 'hover:bg-gray-50', 'border-primary', 'border-b-2');
                 content.classList.remove('hidden');
             } else {
-                btn.classList.remove('border-primary', 'text-primary');
-                btn.classList.add('border-transparent', 'text-gray-500');
+                // Inactive State
+                btn.classList.remove('bg-primary', 'text-white', 'shadow-sm', 'border-primary', 'border-b-2');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50');
                 content.classList.add('hidden');
             }
         });

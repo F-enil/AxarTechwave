@@ -15,3 +15,7 @@ yarn-error.log
 # Build
 dist/
 backend/dist/
+
+# Secrets
+*.json.json
+backend/google-merchant-key.json
